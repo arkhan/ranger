@@ -148,6 +148,15 @@ class FM(Actions,  # pylint: disable=too-many-instance-attributes
         self.settings.signal_bind('setopt.preview_images_method', set_image_displayer,
                                   priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
 
+        # Load user icon overrides from icons.toml (if present)
+        icons_toml = self.confpath('icons.toml')
+        from ranger.gui.icons import load_from_toml
+        if load_from_toml(icons_toml):
+            # Invalidate any cached rendering that used the old icons
+            for directory in self.directories.values():
+                for fobj in (directory.files or []):
+                    fobj.display_data.clear()
+
         # Propagate nerd_font_version to widestring so PUA glyphs measure correctly
         def _sync_nerd_font_version(_sig=None):  # pylint: disable=unused-argument
             import ranger.ext.widestring as _ws
