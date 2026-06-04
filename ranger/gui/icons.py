@@ -399,28 +399,22 @@ def get_icon(fobj):
     basename_lower = fobj.basename.lower()
 
     # 1. Exact filename match (highest priority)
-    if basename_lower in ICONS_BY_FILENAME:
-        return ICONS_BY_FILENAME[basename_lower]
+    icon = ICONS_BY_FILENAME.get(basename_lower)
+    if icon:
+        return icon
 
-    # 2. Directory
+    # 2. Directory (including dir-symlinks)
     if fobj.is_directory:
-        if fobj.is_link:
-            return ICON_DIRECTORY_LINK
-        return ICONS_BY_DIRNAME.get(basename_lower, ICON_DIRECTORY)
+        return ICON_DIRECTORY_LINK if fobj.is_link \
+            else ICONS_BY_DIRNAME.get(basename_lower, ICON_DIRECTORY)
 
-    # 3. Broken / special symlink
-    if fobj.is_link and not fobj.exists:
-        return ICON_LINK_BAD
-
-    # 4. File symlink  (check before extension so we use symlink icon)
+    # 3. Symlinks: broken -> ICON_LINK_BAD, valid -> ICON_FILE_LINK
     if fobj.is_link:
-        return ICON_FILE_LINK
+        return ICON_LINK_BAD if not fobj.exists else ICON_FILE_LINK
 
-    # 5. Extension match
+    # 4. Extension match, with generic file fallback
     if '.' in fobj.basename:
         ext = fobj.basename.rsplit('.', 1)[-1].lower()
-        if ext in ICONS_BY_EXTENSION:
-            return ICONS_BY_EXTENSION[ext]
+        return ICONS_BY_EXTENSION.get(ext, ICON_FILE)
 
-    # 6. Generic file
     return ICON_FILE

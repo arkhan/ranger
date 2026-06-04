@@ -1153,18 +1153,19 @@ class ChafaImageDisplayer(ImageDisplayer):
     def draw(self, path, start_x, start_y, width, height):
         # chafa handles its own output; ranger pipes stdout to the preview pane.
         # We use --animate=off so still images don't loop.
-        Popen(
+        with Popen(
             [
                 'chafa',
                 '--format=symbols',
                 '--stretch',
                 '--animate=off',
-                '--size={}x{}'.format(width, height),
+                '--size={0}x{1}'.format(width, height),
                 '--',
                 path,
             ],
             universal_newlines=True,
-        ).wait()
+        ) as proc:
+            proc.wait()
 
     def clear(self, start_x, start_y, width, height):
         pass  # chafa output is ephemeral text; clearing is handled by ranger

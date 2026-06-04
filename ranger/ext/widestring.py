@@ -2,12 +2,8 @@
 # This file is part of ranger, the console file manager.
 # License: GNU GPL version 3, see the file "AUTHORS" for details.
 
-from __future__ import (absolute_import, division, print_function)
-
 import sys
 from unicodedata import east_asian_width
-
-from ranger import PY3
 
 # ASCIIONLY kept for external compatibility but no longer used internally;
 # replaced by the faster str.isascii() built-in.
@@ -31,8 +27,6 @@ _NF_PUA_RANGES = (
 
 def uwid(string):
     """Return the width of a string"""
-    if not PY3:
-        string = string.decode('utf-8', 'ignore')
     return sum(utf_char_width(c) for c in string)
 
 
@@ -64,36 +58,17 @@ def string_to_charlist(string):
     if string.isascii():
         return list(string)
     result = []
-    if PY3:
-        for char in string:
-            result.append(char)
-            if utf_char_width(char) == WIDE:
-                result.append('')
-    else:
-        try:
-            # This raised a "UnicodeEncodeError: 'ascii' codec can't encode
-            # character u'\xe4' in position 10: ordinal not in range(128)"
-            # for me once.  I thought errors='ignore' means IGNORE THE DAMN
-            # ERRORS but apparently it doesn't.
-            string = string.decode('utf-8', 'ignore')
-        except UnicodeEncodeError:
-            return []
-        for char in string:
-            result.append(char.encode('utf-8'))
-            if east_asian_width(char) in WIDE_SYMBOLS:
-                result.append('')
+    for char in string:
+        result.append(char)
+        if utf_char_width(char) == WIDE:
+            result.append('')
     return result
 
 
 class WideString(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, string, chars=None):
-        try:
-            self.string = str(string)
-        except UnicodeEncodeError:
-            # Here I assume that string is a "unicode" object, because why else
-            # would str(string) raise a UnicodeEncodeError?
-            self.string = string.encode('latin-1', 'ignore')
+        self.string = str(string)
         if chars is None:
             self.chars = string_to_charlist(string)
         else:

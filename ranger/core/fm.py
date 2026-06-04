@@ -149,7 +149,7 @@ class FM(Actions,  # pylint: disable=too-many-instance-attributes
                                   priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
 
         # Propagate nerd_font_version to widestring so PUA glyphs measure correctly
-        def _sync_nerd_font_version(signal=None):
+        def _sync_nerd_font_version(_sig=None):  # pylint: disable=unused-argument
             import ranger.ext.widestring as _ws
             _ws.NERD_FONTS_VERSION = self.settings.nerd_font_version
         _sync_nerd_font_version()
@@ -157,7 +157,7 @@ class FM(Actions,  # pylint: disable=too-many-instance-attributes
                                   priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
 
         # Enable icon linemode + NF VCS symbols when show_icons=true
-        def _sync_show_icons(signal=None):
+        def _sync_show_icons(_sig=None):  # pylint: disable=unused-argument
             from ranger.gui.widgets import Widget
             # Clear any previously set default linemode added by us
             self.default_linemodes = deque(

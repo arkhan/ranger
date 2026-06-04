@@ -164,12 +164,9 @@ class Vcs(object):  # pylint: disable=too-many-instance-attributes
                 return (repodir, repotype)
         return (None, None)
 
-    def _find_root(self, path):
+    def _find_root(self, path):  # pylint: disable=too-many-locals
         """Finds root path, with a module-level cache to skip re-walking."""
-        global _root_cache  # pylint: disable=global-statement
-
         links = set()
-        original_path = path
 
         # Resolve symlink once upfront (rare case)
         if os.path.islink(path):
@@ -181,14 +178,13 @@ class Vcs(object):  # pylint: disable=too-many-instance-attributes
         # Fast path: check if any ancestor path is already cached
         probe = path
         while True:
-            if probe in _root_cache:
-                cached = _root_cache[probe]
-                if cached is None:
-                    return (None, None, None, None)
-                root, repodir, repotype = cached
-                # Populate all intermediate paths too
-                _root_cache[original_path] = cached
-                return (root, repodir, repotype, links)
+            cached = _root_cache.get(probe)
+            if cached is not None:
+                _root_cache[path] = cached
+                return (cached[0], cached[1], cached[2], links)
+            if cached is None and probe in _root_cache:
+                # Explicit None sentinel: no repo above this path
+                return (None, None, None, None)
             parent = os.path.dirname(probe)
             if parent == probe:
                 break
@@ -196,26 +192,24 @@ class Vcs(object):  # pylint: disable=too-many-instance-attributes
 
         # Slow path: walk up to find the repo root
         walk = path
-        visited = []
+        visited = [walk]
         while True:
             repodir, repotype = self._get_repotype(walk)
             if repodir:
-                result = (walk, repodir, repotype)
-                # Cache this root and all subdirs we walked through
-                for p in [walk] + visited:
+                entry = (walk, repodir, repotype)
+                for p in visited:
                     if len(_root_cache) >= _ROOT_CACHE_MAXSIZE:
                         _root_cache.clear()
-                    _root_cache[p] = result
+                    _root_cache[p] = entry
                 return (walk, repodir, repotype, links)
-
-            visited.append(walk)
-            walk_old = walk
-            walk = os.path.dirname(walk)
-            if walk == walk_old:
+            parent = os.path.dirname(walk)
+            if parent == walk:
                 break
+            walk = parent
+            visited.append(walk)
 
-        # No repo found; cache negative result for all visited paths
-        for p in [path] + visited:
+        # No repo found; cache None for all visited paths
+        for p in visited:
             if len(_root_cache) >= _ROOT_CACHE_MAXSIZE:
                 _root_cache.clear()
             _root_cache[p] = None
