@@ -151,16 +151,18 @@ class StatusBar(Widget):  # pylint: disable=too-many-instance-attributes
             space_left -= len(string)
             starting_point += len(string)
 
+    def _add_chooser_badge(self, bar):
+        """Prepend a file-chooser mode badge to the status bar when active."""
+        for arg, label in _CHOOSER_LABELS.items():
+            if getattr(ranger.args, arg, None):
+                bar.left.add(label, 'filechooser', fixed=True)
+                bar.left.add_space()
+                return
+
     def _get_left_part(self, bar):  # pylint: disable=too-many-branches,too-many-statements
         left = bar.left
 
-        # File-chooser mode badge — always visible when launched with
-        # --choosefile / --choosefiles / --choosedir.
-        for arg, label in _CHOOSER_LABELS.items():
-            if getattr(ranger.args, arg, None):
-                left.add(label, 'filechooser', fixed=True)
-                left.add_space()
-                break
+        self._add_chooser_badge(bar)
 
         if self.column is not None and self.column.target is not None\
                 and self.column.target.is_directory:
