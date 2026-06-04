@@ -170,19 +170,19 @@ handle_image() {
             ## as above), but might fail for unsupported types.
             exit 7;;
 
-        ## Video
-        # video/*)
-        #     # Get embedded thumbnail
-        #     ffmpeg -i "${FILE_PATH}" -map 0:v -map -0:V -c copy "${IMAGE_CACHE_PATH}" && exit 6
-        #     # Get frame 10% into video
-        #     ffmpegthumbnailer -i "${FILE_PATH}" -o "${IMAGE_CACHE_PATH}" -s 0 && exit 6
-        #     exit 1;;
+        ## Video -- thumbnail via ffmpegthumbnailer or ffmpeg
+        video/*)
+            ffmpegthumbnailer -i "${FILE_PATH}" -o "${IMAGE_CACHE_PATH}" -s 0 && exit 6
+            ffmpeg -ss 00:00:03 -i "${FILE_PATH}" -vframes 1 \
+                -vf "scale=${DEFAULT_SIZE%x*}:-1" \
+                -y "${IMAGE_CACHE_PATH}" 2>/dev/null && exit 6
+            exit 1;;
 
-        ## Audio
-        # audio/*)
-        #     # Get embedded thumbnail
-        #     ffmpeg -i "${FILE_PATH}" -map 0:v -map -0:V -c copy \
-        #       "${IMAGE_CACHE_PATH}" && exit 6;;
+        ## Audio -- embedded cover art via ffmpeg
+        audio/*)
+            ffmpeg -i "${FILE_PATH}" -map 0:v -map -0:V -c copy \
+                "${IMAGE_CACHE_PATH}" 2>/dev/null && exit 6
+            exit 1;;
 
         ## PDF
         # application/pdf)
@@ -441,10 +441,12 @@ handle_mime() {
             exiftool "${FILE_PATH}" && exit 5
             exit 1;;
 
-        ## Image
+        ## Image -- text-based preview via chafa (works in any terminal / SSH)
+        ## https://hpjansson.org/chafa/
         image/*)
-            ## Preview as text conversion
-            # img2txt --gamma=0.6 --width="${PV_WIDTH}" -- "${FILE_PATH}" && exit 4
+            chafa --format=symbols --stretch --animate=off \
+                --size="${PV_WIDTH}x${PV_HEIGHT}" -- "${FILE_PATH}" && exit 4
+            ## img2txt --gamma=0.6 --width="${PV_WIDTH}" -- "${FILE_PATH}" && exit 4
             exiftool "${FILE_PATH}" && exit 5
             exit 1;;
 
