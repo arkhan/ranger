@@ -148,6 +148,40 @@ class FM(Actions,  # pylint: disable=too-many-instance-attributes
         self.settings.signal_bind('setopt.preview_images_method', set_image_displayer,
                                   priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
 
+        # Propagate nerd_font_version to widestring so PUA glyphs measure correctly
+        def _sync_nerd_font_version(signal=None):
+            import ranger.ext.widestring as _ws
+            _ws.NERD_FONTS_VERSION = self.settings.nerd_font_version
+        _sync_nerd_font_version()
+        self.settings.signal_bind('setopt.nerd_font_version', _sync_nerd_font_version,
+                                  priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
+
+        # Enable icon linemode + NF VCS symbols when show_icons=true
+        def _sync_show_icons(signal=None):
+            from ranger.gui.widgets import Widget
+            # Clear any previously set default linemode added by us
+            self.default_linemodes = deque(
+                e for e in self.default_linemodes
+                if e[2] not in ('icons', 'filename')
+            )
+            if self.settings.show_icons:
+                self.default_linemodes.appendleft(('always', None, 'icons'))
+                if self.settings.nerd_font_version in (2, 3):
+                    Widget.use_nerd_font_vcs()
+            else:
+                Widget.use_plain_vcs()
+            # Invalidate display cache for all loaded directories
+            for directory in self.directories.values():
+                for fobj in (directory.files or []):
+                    fobj.display_data.clear()
+                    try:
+                        del fobj.__dict__['linemode']
+                    except KeyError:
+                        pass
+        _sync_show_icons()
+        self.settings.signal_bind('setopt.show_icons', _sync_show_icons,
+                                  priority=settings.SIGNAL_PRIORITY_AFTER_SYNC)
+
         self.settings.signal_bind(
             'setopt.preview_images',
             lambda signal: signal.fm.previews.clear(),
