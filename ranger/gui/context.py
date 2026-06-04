@@ -21,7 +21,7 @@ CONTEXT_KEYS = [
     'help_markup',  # COMPAT
     'seperator', 'key', 'special', 'border',  # COMPAT
     'title', 'text', 'highlight', 'bars', 'quotes', 'tab', 'loaded',
-    'keybuffer',
+    'keybuffer', 'filechooser',
     'infostring',
     'vcsfile', 'vcsremote', 'vcsinfo', 'vcscommit', 'vcsdate',
     'vcsconflict', 'vcschanged', 'vcsunknown', 'vcsignored', 'vcsuntracked',

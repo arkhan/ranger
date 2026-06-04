@@ -651,6 +651,48 @@ class default_linemode(Command):
                 if lmode.startswith(self.arg(1)))
 
 
+class confirm_selection(Command):
+    """:confirm_selection
+
+    Confirms the current selection when ranger is used as a file chooser
+    (i.e. launched with --choosefile, --choosefiles, or --choosedir).
+
+    Writes the selected path(s) to the output file specified on the
+    command line and exits ranger, exactly as if the user had opened the
+    file normally.  Has no effect when ranger is not in chooser mode.
+
+    Useful as an explicit "confirm" keybind so the user does not have to
+    open/execute the file to confirm it:
+
+        map <C-o> confirm_selection
+    """
+    def execute(self):
+        import ranger
+        from ranger.core.actions import Actions
+        if ranger.args.choosefile:
+            with open(ranger.args.choosefile, 'w', encoding='utf-8') as fobj:
+                fobj.write(self.fm.thisfile.path)
+            raise SystemExit
+        if ranger.args.choosefiles:
+            paths = []
+            for hist in self.fm.thistab.history:
+                for fobj in hist.files:
+                    if fobj.marked and fobj.path not in paths:
+                        paths.append(fobj.path)
+            selection = [f.path for f in self.fm.thistab.get_selection()
+                         if f.path not in paths]
+            paths.extend(selection)
+            with open(ranger.args.choosefiles, 'w', encoding='utf-8') as fobj:
+                fobj.write('\n'.join(paths) + '\n')
+            raise SystemExit
+        if ranger.args.choosedir:
+            path = self.fm.thisdir.path
+            with open(ranger.args.choosedir, 'w', encoding='utf-8') as fobj:
+                fobj.write(path)
+            raise SystemExit
+        self.fm.notify('Not in file-chooser mode', bad=True)
+
+
 class quit(Command):  # pylint: disable=redefined-builtin
     """:quit
 

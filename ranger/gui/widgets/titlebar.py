@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from os.path import basename
 
+import ranger
 from ranger.gui.bar import Bar
 
 from . import Widget
@@ -90,6 +91,15 @@ class TitleBar(Widget):
 
     def _get_left_part(self, bar):
         # TODO: Properly escape non-printable chars without breaking unicode
+
+        # File-chooser indicator at the very start of the title bar.
+        if getattr(ranger.args, 'choosefile', None):
+            bar.add('[FILE PICKER] ', 'filechooser', fixed=True)
+        elif getattr(ranger.args, 'choosefiles', None):
+            bar.add('[MULTI PICKER] ', 'filechooser', fixed=True)
+        elif getattr(ranger.args, 'choosedir', None):
+            bar.add('[DIR PICKER] ', 'filechooser', fixed=True)
+
         if self.settings.hostname_in_titlebar:
             if self.fm.username == 'root':
                 clr = 'bad'

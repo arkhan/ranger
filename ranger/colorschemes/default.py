@@ -126,6 +126,10 @@ class Default(ColorScheme):
                     fg += BRIGHT
             if context.loaded:
                 bg = self.progress_bar_color
+            if context.filechooser:
+                attr |= bold | reverse
+                fg = green
+                fg += BRIGHT
             if context.vcsinfo:
                 fg = blue
                 attr &= ~bold
