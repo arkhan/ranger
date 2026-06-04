@@ -1223,7 +1223,14 @@ Draw images inside the console with the external program w3mimgpreview?
 =item preview_images_method [string]
 
 Set the preview image method. Supported methods: w3m, iterm2, urxvt,
-urxvt-full, terminology.  See I<PREVIEWS> section.
+urxvt-full, terminology, sixel, kitty, ueberzug, ueberzugpp, chafa.
+See I<PREVIEWS> section.
+
+C<ueberzugpp> is a drop-in C++ replacement for C<ueberzug> with Wayland,
+X11 and Kitty support (L<https://github.com/jstkdng/ueberzugpp>).
+
+C<chafa> renders images as Unicode/ANSI art and works in any terminal
+including SSH sessions without X11 (L<https://hpjansson.org/chafa/>).
 
 =item preview_max_size [int]
 
@@ -1266,9 +1273,40 @@ Try to keep this much space between the top/bottom border when scrolling.
 Trim the title of the window if it gets long?  The number defines how many
 directories are displayed at once. A value of 0 turns off this feature.
 
+=item nerd_font_version [integer]
+
+Version of the Nerd Font installed in your terminal. Used to measure the
+display width of icon glyphs correctly.
+
+Possible values:
+
+=over
+
+=item B<0> (default) – no Nerd Font / unknown.
+
+=item B<2> – Nerd Fonts v2.x (icons are 1 cell wide).
+
+=item B<3> – Nerd Fonts v3.x (icons are 2 cells wide; spacing corrected
+automatically).
+
+=back
+
+See also C<show_icons>.
+
 =item show_cursor [bool]
 
 Always show the terminal cursor?
+
+=item show_icons [bool]
+
+Show Nerd Font icons next to filenames? Requires a Nerd Font
+(L<https://www.nerdfonts.com>) active in your terminal emulator.
+
+When enabled, ranger switches to the C<icons> linemode and (if
+C<nerd_font_version> is 2 or 3) replaces plain-Unicode VCS symbols with
+Nerd Font glyphs. Can also be activated manually with C<:set linemode icons>.
+
+See also C<nerd_font_version>.
 
 =item show_hidden_bookmarks [bool]
 
