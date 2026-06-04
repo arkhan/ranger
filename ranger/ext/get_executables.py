@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 from os import listdir, environ, stat
 import platform
 import shlex
-from stat import S_IXUSR, S_IFREG
+from stat import S_IXUSR
 
 from ranger.ext.iter_tools import unique
 
