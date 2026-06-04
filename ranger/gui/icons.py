@@ -119,7 +119,7 @@ ICONS_BY_EXTENSION = {
     'cfg': '\ue615',
     'properties': '\ue615',
     'env': '\uf462',   # nf-oct-gear
-    'editorconfig':'\ue615',
+    'editorconfig': '\ue615',
 
     # --- Documents ---
     'pdf': '\uf1c1',   # nf-fa-file_pdf
