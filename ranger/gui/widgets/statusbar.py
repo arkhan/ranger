@@ -17,10 +17,18 @@ from pwd import getpwuid
 from grp import getgrgid
 from time import time, strftime, localtime
 
+import ranger
 from ranger.ext.human_readable import human_readable
 from ranger.gui.bar import Bar
 
 from . import Widget
+
+# Labels shown in the statusbar badge when ranger runs in file-chooser mode.
+_CHOOSER_LABELS = {
+    'choosefile': ' PICK FILE ',
+    'choosefiles': ' PICK FILES ',
+    'choosedir': ' PICK DIR ',
+}
 
 
 class StatusBar(Widget):  # pylint: disable=too-many-instance-attributes
@@ -145,6 +153,14 @@ class StatusBar(Widget):  # pylint: disable=too-many-instance-attributes
 
     def _get_left_part(self, bar):  # pylint: disable=too-many-branches,too-many-statements
         left = bar.left
+
+        # File-chooser mode badge — always visible when launched with
+        # --choosefile / --choosefiles / --choosedir.
+        for arg, label in _CHOOSER_LABELS.items():
+            if getattr(ranger.args, arg, None):
+                left.add(label, 'filechooser', fixed=True)
+                left.add_space()
+                break
 
         if self.column is not None and self.column.target is not None\
                 and self.column.target.is_directory:
