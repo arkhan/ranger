@@ -1064,3 +1064,110 @@ class UeberzugImageDisplayer(ImageDisplayer):
                 self.process.communicate()
             finally:
                 timer_kill.cancel()
+
+
+@register_image_displayer("ueberzugpp")
+class UeberzugppImageDisplayer(ImageDisplayer):
+    """Implementation of ImageDisplayer using ueberzugpp.
+
+    ueberzugpp is a drop-in C++ replacement for ueberzug that supports:
+      - X11, Wayland (sway, hyprland, etc.)
+      - Kitty graphics protocol
+      - sixel
+      - No Python dependencies
+
+    https://github.com/jstkdng/ueberzugpp
+
+    Install: available in most distro repos as `ueberzugpp`.
+    """
+    IMAGE_ID = 'ranger-preview'
+    is_initialized = False
+
+    def __init__(self):
+        self.process = None
+
+    def initialize(self):
+        """Start ueberzugpp."""
+        if (self.is_initialized and self.process is not None
+                and self.process.poll() is None
+                and not self.process.stdin.closed):
+            return
+
+        # pylint: disable=consider-using-with
+        with open(os.devnull, 'wb') as devnull:
+            self.process = Popen(
+                ['ueberzugpp', 'layer', '--silent'],
+                cwd=self.working_dir,
+                stderr=devnull,
+                stdin=PIPE,
+                universal_newlines=True,
+            )
+        self.is_initialized = True
+
+    def _execute(self, **kwargs):
+        self.initialize()
+        self.process.stdin.write(json.dumps(kwargs, ensure_ascii=False) + '\n')
+        self.process.stdin.flush()
+
+    # pylint: disable=too-many-positional-arguments
+    def draw(self, path, start_x, start_y, width, height):
+        self._execute(
+            action='add',
+            identifier=self.IMAGE_ID,
+            x=start_x,
+            y=start_y,
+            max_width=width,
+            max_height=height,
+            path=path,
+        )
+
+    def clear(self, start_x, start_y, width, height):
+        if self.process and not self.process.stdin.closed:
+            self._execute(action='remove', identifier=self.IMAGE_ID)
+
+    def quit(self):
+        if self.is_initialized and self.process is not None and self.process.poll() is None:
+            timer_kill = threading.Timer(1, self.process.kill, [])
+            try:
+                self.process.terminate()
+                timer_kill.start()
+                self.process.communicate()
+            finally:
+                timer_kill.cancel()
+
+
+@register_image_displayer("chafa")
+class ChafaImageDisplayer(ImageDisplayer):
+    """Implementation of ImageDisplayer using chafa.
+
+    chafa renders images to Unicode/ANSI art and works in **any** terminal
+    including plain SSH sessions without X11 or Wayland.  It auto-detects
+    the best output mode for the current terminal (Kitty, sixel, symbols…).
+
+    https://hpjansson.org/chafa/
+
+    Install: `sudo pacman -S chafa` / `sudo apt install chafa` / brew install chafa
+    """
+
+    # pylint: disable=too-many-positional-arguments
+    def draw(self, path, start_x, start_y, width, height):
+        # chafa handles its own output; ranger pipes stdout to the preview pane.
+        # We use --animate=off so still images don't loop.
+        Popen(
+            [
+                'chafa',
+                '--format=symbols',
+                '--stretch',
+                '--animate=off',
+                '--size={}x{}'.format(width, height),
+                '--',
+                path,
+            ],
+            universal_newlines=True,
+        ).wait()
+
+    def clear(self, start_x, start_y, width, height):
+        pass  # chafa output is ephemeral text; clearing is handled by ranger
+
+    def quit(self):
+        pass
