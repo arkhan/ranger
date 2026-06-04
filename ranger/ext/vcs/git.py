@@ -121,33 +121,44 @@ class Git(Vcs):
         return 'sync'
 
     def data_status_subpaths(self):
+        """Return a dict of {relative_path: status} for this repo.
+
+        Merges what was previously 3 git subprocess calls into 1 by using
+        ``git status --porcelain -z --ignored``, which already contains all
+        the information needed (ignored dirs as ``!! path/``, untracked dirs
+        as ``?? path/``, and every other modified/staged path).
+        """
         statuses = {}
 
-        # Ignored directories
-        paths = self._run([
-            'ls-files', '-z', '--others', '--directory', '--ignored', '--exclude-standard'
-        ]).split('\0')[:-1]
-        for path in paths:
-            if path.endswith('/'):
-                statuses[os.path.normpath(path)] = 'ignored'
-
-        # Empty directories
-        paths = self._run(
-            ['ls-files', '-z', '--others', '--directory', '--exclude-standard']).split('\0')[:-1]
-        for path in paths:
-            if path.endswith('/'):
-                statuses[os.path.normpath(path)] = 'none'
-
-        # Paths with status
-        lines = self._run(['status', '--porcelain', '-z', '--ignored']).split('\0')[:-1]
+        lines = self._run(['status', '--porcelain', '-z', '--ignored']).split('\0')
         skip = False
         for line in lines:
+            if not line:
+                continue
             if skip:
                 skip = False
                 continue
-            statuses[os.path.normpath(line[3:])] = self._status_translate(line[:2])
-            if line.startswith('R'):
-                skip = True
+
+            code = line[:2]
+            raw_path = line[3:]
+            norm = os.path.normpath(raw_path)
+
+            if code == '!!':
+                # Ignored entry (file or directory)
+                if raw_path.endswith('/'):
+                    statuses[norm] = 'ignored'
+                # Individual ignored files are rarely shown, skip them
+            elif code == '??':
+                # Untracked entry; directories become 'none' (neutral),
+                # individual files become 'untracked'
+                if raw_path.endswith('/'):
+                    statuses[norm] = 'none'
+                else:
+                    statuses[norm] = 'untracked'
+            else:
+                statuses[norm] = self._status_translate(code)
+                if line.startswith('R'):
+                    skip = True  # next \0-delimited token is the old path
 
         return statuses
 

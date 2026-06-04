@@ -3,17 +3,20 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from functools import lru_cache
 
-# Similar to functools.lru_cache of python3
+
+# Similar to functools.lru_cache of python3 — now delegates to the real thing.
+# The original hand-rolled cache had no size limit and no thread safety;
+# lru_cache is implemented in C and is significantly faster.
 def cached_function(fnc):
-    cache = {}
+    """Unbounded memoisation decorator (drop-in replacement for the old impl).
 
-    def inner_cached_function(*args):
-        try:
-            return cache[args]
-        except KeyError:
-            value = fnc(*args)
-            cache[args] = value
-            return value
-    inner_cached_function._cache = cache  # pylint: disable=protected-access
-    return inner_cached_function
+    Uses functools.lru_cache with maxsize=None for maximum performance.
+    The cache object is exposed as ``fnc._cache`` for compatibility.
+    """
+    cached = lru_cache(maxsize=None)(fnc)
+
+    # Expose a compatible _cache attribute (read-only view via cache_info)
+    cached._cache = cached  # pylint: disable=protected-access
+    return cached

@@ -250,8 +250,10 @@ class Directory(  # pylint: disable=too-many-instance-attributes,too-many-public
     # XXX: Is it really necessary to have the marked items in a list?
     # Can't we just recalculate them with [f for f in self.files if f.marked]?
     def _gc_marked_items(self):
+        # filenames is a list → build a set once for O(1) membership tests
+        filenames_set = set(self.filenames) if self.filenames else set()
         for item in list(self.marked_items):
-            if item.path not in self.filenames:
+            if item.path not in filenames_set:
                 self.marked_items.remove(item)
 
     def _clear_marked_items(self):
@@ -444,8 +446,13 @@ class Directory(  # pylint: disable=too-many-instance-attributes,too-many-public
                                     os.path.join(self.realpath, item.basename))
 
                     files.append(item)
-                    self.percent = 100 * len(files) // len(filenames)
-                    yield
+                    files_loaded = len(files)
+                    self.percent = 100 * files_loaded // len(filenames)
+                    # Yield control to the UI every 64 files instead of every
+                    # single file, reducing redraw overhead in large directories
+                    # while still showing incremental progress.
+                    if files_loaded % 64 == 0:
+                        yield
                 self.has_vcschild = has_vcschild
                 self.disk_usage = disk_usage
 

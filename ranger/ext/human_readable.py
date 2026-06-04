@@ -32,11 +32,14 @@ def human_readable(byte_count, separator=' ', use_binary=None):
         return ''
     if byte_count <= 0:
         return '0'
-    if SettingsAware.settings.size_in_bytes:
+
+    # Read settings once to avoid repeated attribute chain traversal
+    _settings = SettingsAware.settings
+    if _settings.size_in_bytes:
         return format(byte_count, 'n')  # 'n' = locale-aware separator.
 
     # If you attempt to shorten this code, take performance into consideration.
-    binary = SettingsAware.settings.binary_size_prefix if use_binary is None else use_binary
+    binary = _settings.binary_size_prefix if use_binary is None else use_binary
     if binary:
         prefixes = ('B', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi')
         unit = 1024
