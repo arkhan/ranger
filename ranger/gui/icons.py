@@ -21,6 +21,10 @@ Nerd Fonts codepoint ranges used:
 
 from __future__ import absolute_import
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Default / fallback icons
 # ---------------------------------------------------------------------------
@@ -574,3 +578,98 @@ def get_icon(fobj):
         return ICON_EXEC
 
     return ICON_FILE
+
+
+# ---------------------------------------------------------------------------
+# TOML loader — reads ~/.config/ranger/icons.toml at startup
+# ---------------------------------------------------------------------------
+
+def _get_toml_parser():
+    """Return a tomllib-compatible module or None if unavailable."""
+    try:
+        import tomllib          # Python 3.11+
+        return tomllib
+    except ImportError:
+        pass
+    try:
+        import tomli as tomllib  # pip install tomli  (Python < 3.11)
+        return tomllib
+    except ImportError:
+        pass
+    return None
+
+
+def load_from_toml(path):
+    """Override icon mappings from *path* (icons.toml).
+
+    The file format mirrors yazi's theme.toml [icon] section:
+
+        [defaults]
+        directory = "\\uf07b"
+        file      = "\\uf15b"
+        separator = " "
+
+        [dirs]
+        ".git"      = "\\ue702"
+        "downloads" = "\\uf019"
+
+        [files]
+        "makefile"  = "\\ue779"
+        ".gitignore"= "\\ue702"
+
+        [exts]
+        py  = "\\ue606"
+        rs  = "\\ue7a8"
+        mp4 = "\\uf1c8"
+
+    Values can be literal Unicode characters OR TOML \\uXXXX escapes.
+    Returns True on success, False if the file is missing or unparseable.
+    """
+    toml = _get_toml_parser()
+    if toml is None:
+        LOG.debug('icons.toml: no TOML parser available (need Python 3.11+ or tomli)')
+        return False
+
+    try:
+        with open(path, 'rb') as fh:
+            data = toml.load(fh)
+    except FileNotFoundError:
+        return False
+    except Exception as exc:  # pylint: disable=broad-except
+        LOG.warning('icons.toml: failed to parse %s: %s', path, exc)
+        return False
+
+    # --- defaults section ------------------------------------------------
+    # pylint: disable=global-statement
+    global ICON_DIRECTORY, ICON_DIRECTORY_LINK, ICON_FILE, ICON_FILE_LINK
+    global ICON_LINK_BAD, ICON_EXEC, ICON_FIFO, ICON_SOCKET, ICON_BLOCK
+    global ICON_SEPARATOR
+
+    _map = {
+        'directory':       'ICON_DIRECTORY',
+        'directory_link':  'ICON_DIRECTORY_LINK',
+        'file':            'ICON_FILE',
+        'file_link':       'ICON_FILE_LINK',
+        'link_bad':        'ICON_LINK_BAD',
+        'exec':            'ICON_EXEC',
+        'fifo':            'ICON_FIFO',
+        'socket':          'ICON_SOCKET',
+        'block':           'ICON_BLOCK',
+        'separator':       'ICON_SEPARATOR',
+    }
+    for key, varname in _map.items():
+        val = data.get('defaults', {}).get(key)
+        if val is not None:
+            globals()[varname] = str(val)
+
+    # --- dirs / files / exts sections ------------------------------------
+    for section, target in (
+        ('dirs',  ICONS_BY_DIRNAME),
+        ('files', ICONS_BY_FILENAME),
+        ('exts',  ICONS_BY_EXTENSION),
+    ):
+        for name, glyph in data.get(section, {}).items():
+            target[name.lower()] = str(glyph)
+
+    LOG.debug('icons.toml: loaded from %s', path)
+    return True
