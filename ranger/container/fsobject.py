@@ -13,7 +13,8 @@ from time import time
 from ranger.core.linemode import (
     DEFAULT_LINEMODE, DefaultLinemode, TitleLinemode,
     PermissionsLinemode, FileInfoLinemode, MtimeLinemode, SizeMtimeLinemode,
-    HumanReadableMtimeLinemode, SizeHumanReadableMtimeLinemode
+    HumanReadableMtimeLinemode, SizeHumanReadableMtimeLinemode,
+    IconLinemode, PermissionsIconLinemode,
 )
 from ranger.core.shared import FileManagerAware, SettingsAware
 from ranger.ext.shell_escape import shell_escape
@@ -96,7 +97,7 @@ class FileSystemObject(  # pylint: disable=too-many-instance-attributes,too-many
         (linemode.name, linemode()) for linemode in
         [DefaultLinemode, TitleLinemode, PermissionsLinemode, FileInfoLinemode,
          MtimeLinemode, SizeMtimeLinemode, HumanReadableMtimeLinemode,
-         SizeHumanReadableMtimeLinemode]
+         SizeHumanReadableMtimeLinemode, IconLinemode, PermissionsIconLinemode]
     )
 
     def __init__(self, path, preload=None, path_is_abs=False, basename_is_rel_to=None):
@@ -159,25 +160,27 @@ class FileSystemObject(  # pylint: disable=too-many-instance-attributes,too-many
 
     @lazy_property
     def basename_natural(self):
-        basename_list = []
-        for string in _EXTRACT_NUMBER_RE.findall(self.relative_path):
-            if string[0].isdigit():
-                basename_list.append(('0', int(string)))
+        # Build sort key: numeric chunks become ('0', int) for numeric ordering,
+        # text chunks become ('c',) per character for lexicographic ordering.
+        # Using a list-comprehension with a conditional expression is slightly
+        # faster than the equivalent explicit loop + append.
+        result = []
+        for s in _EXTRACT_NUMBER_RE.findall(self.relative_path):
+            if s[0].isdigit():
+                result.append(('0', int(s)))
             else:
-                for char in string:
-                    basename_list.append((char,))
-        return basename_list
+                result.extend((c,) for c in s)
+        return result
 
     @lazy_property
     def basename_natural_lower(self):
-        basename_list = []
-        for string in _EXTRACT_NUMBER_RE.findall(self.relative_path_lower):
-            if string[0].isdigit():
-                basename_list.append(('0', int(string)))
+        result = []
+        for s in _EXTRACT_NUMBER_RE.findall(self.relative_path_lower):
+            if s[0].isdigit():
+                result.append(('0', int(s)))
             else:
-                for char in string:
-                    basename_list.append((char,))
-        return basename_list
+                result.extend((c,) for c in s)
+        return result
 
     @lazy_property
     def basename_without_extension(self):

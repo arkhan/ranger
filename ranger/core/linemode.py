@@ -12,6 +12,12 @@ from ranger.ext.abc import ABC
 from ranger.ext.human_readable import human_readable, human_readable_time
 from ranger.ext import spawn
 
+try:
+    from ranger.gui.icons import get_icon, ICON_SEPARATOR
+    _ICONS_AVAILABLE = True
+except ImportError:
+    _ICONS_AVAILABLE = False
+
 
 DEFAULT_LINEMODE = "filename"
 
@@ -59,6 +65,44 @@ class DefaultLinemode(LinemodeBase):  # pylint: disable=abstract-method
 
     def filetitle(self, fobj, metadata):
         return fobj.relative_path
+
+
+class IconLinemode(LinemodeBase):  # pylint: disable=abstract-method
+    """Prepend a Nerd Font icon to the filename.
+
+    Requires a Nerd Font (https://www.nerdfonts.com) installed and active in
+    the terminal. Set `set nerd_font_version 3` in rc.conf if using NF v3
+    so that 2-cell-wide glyphs are measured correctly.
+
+    Activate with:  set linemode icons
+    Or map:         map Mi linemode icons
+    """
+    name = "icons"
+
+    def filetitle(self, fobj, metadata):
+        if _ICONS_AVAILABLE:
+            return get_icon(fobj) + ICON_SEPARATOR + fobj.relative_path
+        return fobj.relative_path
+
+
+class PermissionsIconLinemode(LinemodeBase):
+    """Like `permissions` linemode but with a Nerd Font icon prefix."""
+    name = "permissionsicons"
+
+    def filetitle(self, fobj, metadata):
+        prefix = ""
+        if _ICONS_AVAILABLE:
+            prefix = get_icon(fobj) + ICON_SEPARATOR
+        return "%s%s %s %s %s" % (
+            prefix,
+            fobj.get_permission_string(),
+            fobj.user,
+            fobj.group,
+            fobj.relative_path,
+        )
+
+    def infostring(self, fobj, metadata):
+        return ""
 
 
 class TitleLinemode(LinemodeBase):
