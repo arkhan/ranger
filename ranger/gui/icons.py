@@ -2,828 +2,536 @@
 # This file is part of ranger, the console file manager.
 # License: GNU GPL version 3, see the file "AUTHORS" for details.
 
-"""Nerd Font icon mappings — synced from yazi theme.toml [icon] section.
+"""Nerd Font icon mappings synced from yazi theme.toml.
 
-Set `set nerd_font_version 3` in rc.conf when using NF v3 terminals so
-that 2-cell-wide glyphs are measured correctly by widestring.py.
+All glyphs use explicit Unicode escape sequences so they survive any
+copy/paste or encoding transformation.
+
+Nerd Fonts codepoint ranges used:
+  \\ue000-\\ue0ff  Powerline / Powerline Extra
+  \\ue200-\\ue2ff  Font Awesome Extension
+  \\ue600-\\ue6ff  Seti-UI + devicons
+  \\ue700-\\ue7ff  devicons (continued)
+  \\uf000-\\uf2ff  Font Awesome (fa-)
+  \\uf300-\\uf3ff  Font Logos
+  \\uf400-\\uf4ff  Octicons (oct-)
+  \\uf500-\\uf8ff  Material Design subset / misc
+  \\U000fXXXX     Nerd Fonts v3 supplementary (md- icons)
 """
 
 from __future__ import absolute_import
 
 # ---------------------------------------------------------------------------
-# Icons by file extension  (lowercase key → glyph)
-# Source: yazi theme.toml [icon] exts
+# Default / fallback icons
 # ---------------------------------------------------------------------------
-ICONS_BY_EXTENSION = {
-    # 3D / CAD
-    "3gp": "",
-    "3mf": "󰆧",
-    "fbx": "󰆧",
-    "obj": "󰆧",
-    "ply": "󰆧",
-    "stl": "󰆧",
-    "wrl": "󰆧",
-    "wrz": "󰆧",
-    "brep": "󰻫",
-    "dwg": "󰻫",
-    "dxf": "󰻫",
-    "f3d": "󰻫",
-    "ifc": "󰻫",
-    "ige": "󰻫",
-    "iges": "󰻫",
-    "igs": "󰻫",
-    "skp": "󰻫",
-    "sldasm": "󰻫",
-    "sldprt": "󰻫",
-    "slvs": "󰻫",
-    "ste": "󰻫",
-    "step": "󰻫",
-    "stp": "󰻫",
-    "blend": "󰂫",
-    "scad": "",
-    "gcode": "󰐫",
-    "fcbak": "",
-    "fcmacro": "",
-    "fcmat": "",
-    "fcparam": "",
-    "fcscript": "",
-    "fcstd": "",
-    "fcstd1": "",
-    "fctb": "",
-    "fctl": "",
+ICON_DIRECTORY = '\uf07b'       # nf-fa-folder
+ICON_DIRECTORY_LINK = '\uf482'  # nf-oct-file_symlink_directory
+ICON_FILE = '\uf15b'            # nf-fa-file
+ICON_FILE_LINK = '\uf481'       # nf-oct-file_symlink_file
+ICON_LINK_BAD = '\uf127'        # nf-fa-chain_broken  (orphan symlink)
+ICON_EXEC = '\uf489'            # nf-oct-terminal
+ICON_FIFO = '\uf731'            # nf-fa-exchange (pipe)
+ICON_SOCKET = '\uf6ff'          # nf-fa-plug
+ICON_BLOCK = '\uf0a0'           # nf-fa-hdd_o
 
-    # Archives
-    "7z": "",
-    "a": "",
-    "apk": "",
-    "bz": "",
-    "bz2": "",
-    "bz3": "",
-    "cpio": "",
-    "deb": "",
-    "gz": "",
-    "ko": "",
-    "lib": "",
-    "o": "",
-    "out": "",
-    "pkg": "",
-    "rar": "",
-    "rpm": "",
-    "tar": "",
-    "tgz": "",
-    "txz": "",
-    "xpi": "",
-    "xz": "",
-    "zip": "",
-    "zst": "",
+# Separator appended after the icon (thin space works well with NF v3)
+ICON_SEPARATOR = ' '
 
-    # Audio
-    "aac": "",
-    "aif": "",
-    "aiff": "",
-    "ape": "",
-    "flac": "",
-    "m4a": "",
-    "mp3": "",
-    "oga": "",
-    "ogg": "",
-    "opus": "",
-    "pcm": "",
-    "spx": "",
-    "wav": "",
-    "wma": "",
-    "wv": "",
-    "wvc": "",
-
-    # Config / Data
-    "cfg": "",
-    "conf": "",
-    "dconf": "",
-    "desktop": "",
-    "env": "",
-    "ini": "",
-    "json": "",
-    "json5": "",
-    "jsonc": "",
-    "plist": "",
-    "properties": "",
-    "toml": "",
-    "xml": "󰗀",
-    "xslt": "󰗀",
-    "yaml": "",
-    "yml": "",
-
-    # C / C++
-    "c": "",
-    "h": "",
-    "hh": "",
-    "hpp": "",
-    "hxx": "",
-    "cc": "",
-    "cp": "",
-    "cpp": "",
-    "cppm": "",
-    "ccm": "",
-    "cxx": "",
-    "cxxm": "",
-    "ixx": "",
-    "mm": "",
-    "xm": "",
-
-    # C#
-    "cs": "󰌛",
-    "cshtml": "󱦗",
-    "csproj": "󰪮",
-    "razor": "󱦘",
-    "xaml": "󰙳",
-    "sln": "",
-    "slnx": "",
-    "suo": "",
-    "vsix": "",
-
-    # Clojure
-    "clj": "",
-    "cljc": "",
-    "cljd": "",
-    "cljs": "",
-    "edn": "",
-
-    # COBOL
-    "cbl": "",
-    "cob": "",
-    "cobol": "",
-    "cpy": "",
-
-    # Crystal
-    "cr": "",
-
-    # CSS / Style
-    "css": "",
-    "less": "",
-    "sass": "",
-    "scss": "",
-    "styl": "",
-
-    # Dart
-    "dart": "",
-
-    # Database
-    "db": "",
-    "dump": "",
-    "sql": "",
-    "sqlite": "",
-    "sqlite3": "",
-    "mdb": "",
-    "accdb": "",
-    "kdb": "",
-    "kdbx": "",
-
-    # Docker
-    "Dockerfile": "󰡨",
-    "dockerignore": "󰡨",
-
-    # Documents
-    "bib": "󱉟",
-    "cbr": "",
-    "cbz": "",
-    "djvu": "",
-    "doc": "󰈬",
-    "docx": "󰈬",
-    "ebook": "",
-    "epub": "",
-    "fodt": "",
-    "mobi": "",
-    "odf": "",
-    "odt": "",
-    "pdf": "",
-    "pod": "",
-    "ps": "",
-    "rmd": "",
-    "rst": "",
-    "rtf": "",
-    "tex": "",
-    "txt": "󰈙",
-    "typ": "",
-
-    # Elixir
-    "ex": "",
-    "exs": "",
-    "eex": "",
-    "heex": "",
-    "leex": "",
-
-    # Elm
-    "elm": "",
-
-    # Erlang
-    "erl": "",
-    "hrl": "",
-
-    # F#
-    "fs": "",
-    "fsi": "",
-    "fsscript": "",
-    "fsx": "",
-
-    # Fennel
-    "fnl": "",
-
-    # Fish
-    "fish": "",
-
-    # Font
-    "eot": "",
-    "flf": "",
-    "lff": "",
-    "otf": "",
-    "ttf": "",
-    "woff": "",
-    "woff2": "",
-
-    # Fortran
-    "f90": "󱈚",
-
-    # GLSL / Shaders
-    "frag": "",
-    "geom": "",
-    "glsl": "",
-    "vert": "",
-
-    # Go
-    "go": "",
-
-    # GraphQL
-    "gql": "",
-    "graphql": "",
-
-    # Gradle / Build
-    "gradle": "",
-
-    # Groovy
-    "groovy": "",
-
-    # Haskell
-    "hs": "",
-    "lhs": "",
-
-    # HTML
-    "htm": "",
-    "html": "",
-    "xhtml": "",
-
-    # Image
-    "ai": "",
-    "avif": "",
-    "bmp": "",
-    "gif": "",
-    "ico": "",
-    "jxl": "",
-    "jpeg": "",
-    "jpg": "",
-    "png": "",
-    "psb": "",
-    "psd": "",
-    "svg": "󰜡",
-    "svgz": "󰜡",
-    "tiff": "",
-    "tif": "",
-    "webp": "",
-    "xcf": "",
-
-    # Java
-    "java": "",
-    "jar": "",
-    "class": "",
-
-    # JavaScript
-    "cjs": "",
-    "js": "",
-    "jsx": "",
-    "mjs": "",
-    "spec.js": "",
-    "test.js": "",
-
-    # Julia
-    "jl": "",
-
-    # Jupyter
-    "ipynb": "",
-
-    # Kotlin
-    "kt": "",
-    "kts": "",
-
-    # Lua
-    "lua": "",
-    "luac": "",
-    "luau": "",
-
-    # Markdown
-    "md": "",
-    "markdown": "",
-    "mdx": "",
-
-    # ML / OCaml
-    "ml": "",
-    "mli": "",
-
-    # Nim
-    "nim": "",
-
-    # Nix
-    "nix": "",
-
-    # Nu
-    "nu": "",
-
-    # Patch / Diff
-    "diff": "",
-    "patch": "",
-
-    # PDF
-    "pdf": "",
-
-    # Perl
-    "pl": "",
-    "pm": "",
-    "t": "",
-
-    # PHP
-    "php": "",
-    "blade.php": "",
-
-    # PowerShell
-    "ps1": "󰨊",
-    "psd1": "󰨊",
-    "psm1": "󰨊",
-
-    # Presentations
-    "fodp": "",
-    "odp": "",
-    "ppt": "󰈧",
-    "pptx": "󰈧",
-
-    # Prisma
-    "prisma": "",
-
+# ---------------------------------------------------------------------------
+# Icons by directory name  (lowercase basename -> glyph)
+# ---------------------------------------------------------------------------
+ICONS_BY_DIRNAME = {
+    # Version control
+    '.git':         '\ue702',   # nf-dev-git
+    '.github':      '\uf408',   # nf-oct-mark_github
+    '.svn':         '\uf408',
+    '.hg':          '\uf408',
+    # Package managers / build
+    'node_modules': '\ue60c',   # nf-dev-javascript
+    '.npm':         '\ue60c',
     # Python
-    "py": "",
-    "pyc": "",
-    "pyd": "",
-    "pyi": "",
-    "pyo": "",
-    "pyw": "",
-    "pyx": "",
-    "pxd": "",
-    "pxi": "",
-
-    # R
-    "r": "󰟔",
-    "R": "󰟔",
-
-    # Ruby
-    "rb": "",
-    "erb": "",
-    "gemspec": "",
-    "rake": "",
-
-    # Rust
-    "rs": "",
-    "rlib": "",
-
-    # Scala
-    "scala": "",
-    "sc": "",
-    "sbt": "",
-
-    # Shell
-    "awk": "",
-    "bash": "",
-    "bat": "",
-    "csh": "",
-    "ksh": "",
-    "sh": "",
-    "zsh": "",
-
-    # Spreadsheets
-    "csv": "",
-    "fods": "",
-    "ods": "",
-    "xls": "󰈛",
-    "xlsx": "󰈛",
-
-    # SQL
-    "sql": "",
-    "sqlite": "",
-    "sqlite3": "",
-
-    # Svelte
-    "svelte": "",
-
-    # Swift
-    "swift": "",
-
-    # TOML
-    "toml": "",
-
-    # TypeScript
-    "cts": "",
-    "mts": "",
-    "ts": "",
-    "tsx": "",
-    "spec.ts": "",
-    "test.ts": "",
-    "spec.tsx": "",
-    "test.tsx": "",
-    "d.ts": "",
-
-    # Vala
-    "vala": "",
-
-    # Verilog / VHDL
-    "sv": "󰍛",
-    "svh": "󰍛",
-    "v": "󰍛",
-    "vh": "󰍛",
-    "vhd": "󰍛",
-    "vhdl": "󰍛",
-
-    # Video
-    "avi": "",
-    "cast": "",
-    "flv": "",
-    "m4v": "",
-    "mkv": "",
-    "mov": "",
-    "mp4": "",
-    "mpeg": "",
-    "mpg": "",
-    "ogv": "",
-    "ogx": "",
-    "webm": "",
-    "wmv": "",
-
-    # Vim
-    "vim": "",
-
-    # Vue
-    "vue": "",
-
-    # WASM
-    "wasm": "",
-
-    # Zig
-    "zig": "",
-
-    # Misc
-    "asc": "󰦝",
-    "bak": "󰁯",
-    "bin": "",
-    "cache": "",
-    "cert": "",
-    "crt": "",
-    "crdownload": "",
-    "download": "",
-    "dropbox": "",
-    "elf": "",
-    "exe": "",
-    "fdmdownload": "",
-    "gpg": "󰯄",
-    "hex": "",
-    "image": "",
-    "img": "",
-    "iso": "",
-    "kbx": "󰯄",
-    "lck": "",
-    "lock": "",
-    "log": "󰌱",
-    "magnet": "",
-    "md5": "󰕥",
-    "pem": "󰷖",
-    "pub": "󰷖",
-    "sha1": "󰕥",
-    "sha256": "󰕥",
-    "sha512": "󰕥",
-    "so": "",
-    "torrent": "",
-    "dll": "",
-    "lrc": "󰨖",
-    "srt": "󰨖",
-    "ssa": "󰨖",
-    "sub": "󰨖",
-    "ass": "󰨖",
-    "part": "",
-    "ical": "",
-    "icalendar": "",
-    "ics": "",
-    "ifb": "",
-    "rss": "",
-    "po": "",
-    "pot": "",
-    "strings": "",
-    "qm": "",
-    "nfo": "",
-    "info": "",
+    '.venv':        '\ue606',   # nf-dev-python
+    'venv':         '\ue606',
+    '__pycache__':  '\ue606',
+    # Misc build
+    'build':        '\uf187',   # nf-fa-archive
+    'dist':         '\uf187',
+    'target':       '\uf187',
+    '.cache':       '\uf187',
+    # Config / system
+    '.config':      '\ue615',   # nf-custom-settings
+    '.local':       '\ue615',
+    '.ssh':         '\uf023',   # nf-fa-lock
+    '.gnupg':       '\uf023',
+    '.docker':      '\ue7b0',   # nf-dev-docker
+    '.trash':       '\uf1f8',   # nf-fa-trash
+    'trash':        '\uf1f8',
+    # XDG user dirs
+    'desktop':      '\uf108',   # nf-fa-desktop
+    'documents':    '\uf02d',   # nf-fa-book
+    'downloads':    '\uf019',   # nf-fa-download
+    'music':        '\uf001',   # nf-fa-music
+    'pictures':     '\uf03e',   # nf-fa-picture_o
+    'photos':       '\uf03e',
+    'public':       '\uf064',   # nf-fa-share
+    'videos':       '\uf03d',   # nf-fa-film
+    'movies':       '\uf03d',
+    'library':      '\uf02d',
+    'development':  '\uf121',   # nf-fa-code
 }
 
 # ---------------------------------------------------------------------------
-# Icons by exact filename  (lowercase → glyph)
-# Source: yazi theme.toml [icon] files
+# Icons by exact filename  (lowercase -> glyph)
 # ---------------------------------------------------------------------------
 ICONS_BY_FILENAME = {
     # Version control
-    ".gitattributes": "",
-    ".gitconfig": "",
-    ".gitignore": "",
-    ".git-blame-ignore-revs": "",
-    ".gitlab-ci.yml": "",
-    ".gitmodules": "",
-    ".mailmap": "󰊢",
-    "commit_editmsg": "",
+    '.gitattributes':           '\ue702',
+    '.gitconfig':               '\ue702',
+    '.gitignore':               '\ue702',
+    '.gitmodules':              '\ue702',
+    '.git-blame-ignore-revs':   '\ue702',
+    '.gitkeep':                 '\ue702',
+    '.hgignore':                '\uf408',
+    '.mailmap':                 '\ue702',
+    'commit_editmsg':           '\ue702',
+    '.gitlab-ci.yml':           '\uf296',   # nf-fa-gitlab
 
     # Shell config
-    ".bash_profile": "",
-    ".bashrc": "",
-    ".zprofile": "",
-    ".zshenv": "",
-    ".zshrc": "",
+    '.bash_profile':            '\uf489',
+    '.bashrc':                  '\uf489',
+    '.bash_logout':             '\uf489',
+    '.profile':                 '\uf489',
+    '.zprofile':                '\uf489',
+    '.zshenv':                  '\uf489',
+    '.zshrc':                   '\uf489',
 
     # Editor config
-    ".editorconfig": "",
-    ".gvimrc": "",
-    ".nvimrc": "",
-    ".vimrc": "",
-    "_gvimrc": "",
-    "_vimrc": "",
+    '.editorconfig':            '\ue615',
+    '.gvimrc':                  '\ue62b',   # nf-dev-vim
+    '.nvimrc':                  '\ue62b',
+    '.vimrc':                   '\ue62b',
+    '_vimrc':                   '\ue62b',
+    '_gvimrc':                  '\ue62b',
 
     # Linters / Formatters
-    ".babelrc": "",
-    ".clang-format": "",
-    ".clang-tidy": "",
-    ".codespellrc": "󰓆",
-    ".eslintignore": "",
-    ".eslintrc": "",
-    ".luacheckrc": "",
-    ".luaurc": "",
-    ".nanorc": "",
-    ".npmignore": "",
-    ".npmrc": "",
-    ".nuxtrc": "󱄆",
-    ".nvmrc": "",
-    ".prettierignore": "",
-    ".prettierrc": "",
-    ".prettierrc.cjs": "",
-    ".prettierrc.js": "",
-    ".prettierrc.json": "",
-    ".prettierrc.json5": "",
-    ".prettierrc.mjs": "",
-    ".prettierrc.toml": "",
-    ".prettierrc.yaml": "",
-    ".prettierrc.yml": "",
-    ".pylintrc": "",
-    "eslint.config.cjs": "",
-    "eslint.config.js": "",
-    "eslint.config.mjs": "",
-    "eslint.config.ts": "",
-    "prettier.config.cjs": "",
-    "prettier.config.js": "",
-    "prettier.config.mjs": "",
-    "prettier.config.ts": "",
+    '.babelrc':                 '\ue60c',
+    '.clang-format':            '\ue61d',
+    '.clang-tidy':              '\ue61d',
+    '.eslintignore':            '\ue60c',
+    '.eslintrc':                '\ue60c',
+    '.luacheckrc':              '\ue620',   # nf-dev-lua
+    '.nanorc':                  '\ue62a',
+    '.npmignore':               '\ue60c',
+    '.npmrc':                   '\ue60c',
+    '.nvmrc':                   '\ue60c',
+    '.prettierrc':              '\ue60c',
+    '.pylintrc':                '\ue606',
+    'eslint.config.js':         '\ue60c',
+    'eslint.config.ts':         '\ue60c',
+    'eslint.config.mjs':        '\ue60c',
+    'prettier.config.js':       '\ue60c',
+    'prettier.config.ts':       '\ue60c',
 
-    # Environment
-    ".condarc": "",
-    ".ds_store": "",
-    ".env": "",
-    ".env.local": "",
-    ".env.example": "",
-    ".gtkrc-2.0": "",
-    ".justfile": "",
-    ".pnpmfile.cjs": "",
-    ".pre-commit-config.yaml": "󰛢",
-    ".settings.json": "",
-    ".SRCINFO": "󰣇",
-    ".Xauthority": "",
-    ".xinitrc": "",
-    ".Xresources": "",
-    ".xsession": "",
-    "gtkrc": "",
-    "weston.ini": "",
-    "xdph.conf": "",
-    "xorg.conf": "",
-    "xsettingsd.conf": "",
+    # Environment / secrets
+    '.env':                     '\uf462',   # nf-oct-gear
+    '.dockerignore':            '\ue7b0',   # nf-dev-docker
 
     # Build / Package managers
-    "build": "",
-    "build.gradle": "",
-    "build.zig.zon": "",
-    "bun.lock": "",
-    "bun.lockb": "",
-    "cantorrc": "",
-    "cmakelists.txt": "",
-    "compose.yaml": "󰡨",
-    "compose.yml": "󰡨",
-    "containerfile": "󰡨",
-    "docker-compose.yaml": "󰡨",
-    "docker-compose.yml": "󰡨",
-    "dockerfile": "󰡨",
-    "gemfile": "",
-    "gemfile.lock": "",
-    "gnumakefile": "",
-    "go.mod": "",
-    "go.sum": "",
-    "go.work": "",
-    "gradle-wrapper.properties": "",
-    "gradle.properties": "",
-    "gradlew": "",
-    "gruntfile.babel.js": "",
-    "gruntfile.coffee": "",
-    "gruntfile.js": "",
-    "gruntfile.ts": "",
-    "gulpfile.babel.js": "",
-    "gulpfile.coffee": "",
-    "gulpfile.js": "",
-    "gulpfile.ts": "",
-    "justfile": "",
-    "makefile": "",
-    "mix.lock": "",
-    "package-lock.json": "",
-    "package.json": "",
-    "pkgbuild": "󰣇",
-    "platformio.ini": "",
-    "pnpm-lock.yaml": "",
-    "pnpm-workspace.yaml": "",
-    "pom.xml": "",
-    "procfile": "",
-    "rakefile": "",
-    "settings.gradle": "",
-    "workspace": "",
+    'cmakelists.txt':           '\ue779',
+    'compose.yaml':             '\ue7b0',
+    'compose.yml':              '\ue7b0',
+    'containerfile':            '\ue7b0',
+    'docker-compose.yaml':      '\ue7b0',
+    'docker-compose.yml':       '\ue7b0',
+    'dockerfile':               '\ue7b0',
+    'gemfile':                  '\ue21e',   # nf-dev-ruby
+    'gemfile.lock':             '\ue21e',
+    'gnumakefile':              '\ue779',   # nf-dev-gnu
+    'go.mod':                   '\ue627',   # nf-dev-go
+    'go.sum':                   '\ue627',
+    'go.work':                  '\ue627',
+    'gruntfile.js':             '\uf0d0',   # nf-fa-flag
+    'gruntfile.ts':             '\uf0d0',
+    'gulpfile.js':              '\uf0f9',
+    'gulpfile.ts':              '\uf0f9',
+    'justfile':                 '\uf013',   # nf-fa-gear
+    'makefile':                 '\ue779',
+    'mix.lock':                 '\ue62d',   # nf-dev-elixir
+    'package-lock.json':        '\ue60c',
+    'package.json':             '\ue60c',
+    'pkgbuild':                 '\uf303',   # nf-fa-linux
+    'pom.xml':                  '\ue738',   # nf-dev-java
+    'procfile':                 '\uf013',
+    'rakefile':                 '\ue21e',
+    'vagrantfile':              '\ue7b0',
+    'workspace':                '\ue22b',   # nf-fa-briefcase
 
-    # CI / Infra
-    ".dockerignore": "󰡨",
-    ".travis.yml": "",
-    "jenkinsfile": "",
-    "vagrantfile": "",
-
-    # Configs (app-specific)
-    "bspwmrc": "",
-    "checkhealth": "󰓙",
-    "commitlint.config.js": "󰜘",
-    "commitlint.config.ts": "󰜘",
-    "config": "",
-    "fp-info-cache": "",
-    "fp-lib-table": "",
-    "freecad.conf": "",
-    "groovy": "",
-    "hypridle.conf": "",
-    "hyprland.conf": "",
-    "hyprlandd.conf": "",
-    "hyprlock.conf": "",
-    "hyprpaper.conf": "",
-    "hyprsunset.conf": "",
-    "i18n.config.js": "󰗊",
-    "i18n.config.ts": "󰗊",
-    "i3blocks.conf": "",
-    "i3status.conf": "",
-    "index.theme": "",
-    "ionic.config.json": "",
-    "kalgebrarc": "",
-    "kdeglobals": "",
-    "kdenlive-layoutsrc": "",
-    "kdenliverc": "",
-    "kritadisplayrc": "",
-    "kritarc": "",
-    "lxde-rc.xml": "",
-    "lxqt.conf": "",
-    "mpv.conf": "",
-    "qtproject.conf": "",
-    "sxhkdrc": "",
-    "sym-lib-table": "",
-    "tmux.conf": "",
-    "tmux.conf.local": "",
-    "vercel.json": "",
-    "vlcrc": "󰕼",
-    "webpack": "󰜫",
-    "wrangler.jsonc": "",
-    "wrangler.toml": "",
-    "xmobarrc": "",
-    "xmobarrc.hs": "",
-    "xmonad.hs": "",
+    # CI
+    '.travis.yml':              '\ue77e',   # nf-dev-travis
+    'jenkinsfile':              '\ue767',   # nf-dev-jenkins
 
     # Frameworks
-    "next.config.cjs": "",
-    "next.config.js": "",
-    "next.config.ts": "",
-    "node_modules": "",
-    "nuxt.config.cjs": "󱄆",
-    "nuxt.config.js": "󱄆",
-    "nuxt.config.mjs": "󱄆",
-    "nuxt.config.ts": "󱄆",
-    "svelte.config.js": "",
-    "tailwind.config.js": "󱏿",
-    "tailwind.config.mjs": "󱏿",
-    "tailwind.config.ts": "󱏿",
-    "tsconfig.json": "",
-    "vite.config.cjs": "",
-    "vite.config.cts": "",
-    "vite.config.js": "",
-    "vite.config.mjs": "",
-    "vite.config.mts": "",
-    "vite.config.ts": "",
-    "vitest.config.cjs": "",
-    "vitest.config.cts": "",
-    "vitest.config.js": "",
-    "vitest.config.mjs": "",
-    "vitest.config.mts": "",
-    "vitest.config.ts": "",
-
-    # Testing
-    "playwright.config.cjs": "",
-    "playwright.config.cts": "",
-    "playwright.config.js": "",
-    "playwright.config.mjs": "",
-    "playwright.config.mts": "",
-    "playwright.config.ts": "",
+    'next.config.js':           '\ue60c',
+    'next.config.ts':           '\ue60c',
+    'nuxt.config.js':           '\ue6a0',   # nf-dev-vue
+    'nuxt.config.ts':           '\ue6a0',
+    'svelte.config.js':         '\ue697',   # nf-dev-svelte
+    'tailwind.config.js':       '\uf1e7',   # nf-fa-css3 (tailwind approx)
+    'tailwind.config.ts':       '\uf1e7',
+    'tsconfig.json':            '\ue628',   # nf-dev-typescript
+    'vite.config.js':           '\ue7a2',   # nf-dev-vitejs (approx)
+    'vite.config.ts':           '\ue7a2',
+    'vitest.config.js':         '\ue7a2',
+    'vitest.config.ts':         '\ue7a2',
+    'playwright.config.js':     '\uf489',
+    'playwright.config.ts':     '\uf489',
 
     # Docs / Meta
-    "authors": "",
-    "authors.txt": "",
-    "brewfile": "",
-    "code_of_conduct": "",
-    "code_of_conduct.md": "",
-    "copying": "",
-    "copying.lesser": "",
-    "favicon.ico": "",
-    "license": "",
-    "license.md": "",
-    "unlicense": "",
-    "readme": "󰂺",
-    "readme.md": "󰂺",
-    "security": "󰒃",
-    "security.md": "󰒃",
+    'authors':                  '\uf007',   # nf-fa-user
+    'authors.txt':              '\uf007',
+    'copying':                  '\uf718',   # nf-fa-creative_commons
+    'copying.lesser':           '\uf718',
+    'license':                  '\uf718',
+    'license.md':               '\uf718',
+    'unlicense':                '\uf718',
+    'readme':                   '\uf48a',   # nf-oct-markdown
+    'readme.md':                '\uf48a',
+    'readme.txt':               '\uf48a',
+    'security':                 '\uf023',
+    'security.md':              '\uf023',
+    'code_of_conduct':          '\uf4be',
+    'code_of_conduct.md':       '\uf4be',
+    'changelog':                '\uf46a',
+    'changelog.md':             '\uf46a',
+    'favicon.ico':              '\uf005',   # nf-fa-star
+
+    # Config (app-specific)
+    'config':                   '\ue615',
+    'mpv.conf':                 '\uf03d',   # nf-fa-film
+    'tmux.conf':                '\uf489',
+    'tmux.conf.local':          '\uf489',
+    'hypridle.conf':            '\uf013',
+    'hyprland.conf':            '\uf013',
+    'hyprlock.conf':            '\uf013',
+    'hyprpaper.conf':           '\uf03e',
+    'i3blocks.conf':            '\uf0c9',
+    'i3status.conf':            '\uf0c9',
+    'xorg.conf':                '\uf17c',   # nf-fa-linux
+    'node_modules':             '\ue60c',
 
     # Prisma
-    "prisma.config.mts": "",
-    "prisma.config.ts": "",
+    'prisma.config.ts':         '\uf1c0',
 }
 
 # ---------------------------------------------------------------------------
-# Icons by directory name  (lowercase → glyph)
-# Source: yazi theme.toml [icon] dirs + conds
+# Icons by file extension  (lowercase -> glyph)
 # ---------------------------------------------------------------------------
-ICONS_BY_DIRNAME = {
-    ".config": "",
-    ".git": "",
-    ".github": "",
-    ".npm": "",
-    "desktop": "",
-    "development": "",
-    "documents": "",
-    "downloads": "",
-    "library": "",
-    "movies": "",
-    "music": "",
-    "pictures": "",
-    "photos": "",
-    "public": "",
-    "videos": "",
-    # Extra common dirs not in yazi (kept from original)
-    ".cache": "",
-    ".docker": "󰡨",
-    ".gnupg": "󰯄",
-    ".local": "",
-    ".ssh": "󰷖",
-    ".trash": "",
-    ".venv": "",
-    "__pycache__": "",
-    "build": "",
-    "dist": "",
-    "node_modules": "",
-    "target": "",
-    "trash": "",
-    "venv": "",
+ICONS_BY_EXTENSION = {
+    # --- Python ---
+    'py':           '\ue606',   # nf-dev-python
+    'pyc':          '\ue606',
+    'pyd':          '\ue606',
+    'pyi':          '\ue606',
+    'pyo':          '\ue606',
+    'pyw':          '\ue606',
+    'pyx':          '\ue606',
+    'pxd':          '\ue606',
+    'ipynb':        '\ue606',
+
+    # --- JavaScript ---
+    'cjs':          '\ue60c',   # nf-dev-javascript
+    'js':           '\ue60c',
+    'jsx':          '\ue60c',
+    'mjs':          '\ue60c',
+
+    # --- TypeScript ---
+    'cts':          '\ue628',   # nf-dev-typescript
+    'mts':          '\ue628',
+    'ts':           '\ue628',
+    'tsx':          '\ue628',
+
+    # --- Rust ---
+    'rs':           '\ue7a8',   # nf-dev-rust
+
+    # --- Go ---
+    'go':           '\ue627',   # nf-dev-go
+
+    # --- C / C++ ---
+    'c':            '\ue61e',   # nf-dev-c
+    'h':            '\ue61e',
+    'cc':           '\ue61d',   # nf-dev-cpp
+    'cpp':          '\ue61d',
+    'cxx':          '\ue61d',
+    'hh':           '\ue61d',
+    'hpp':          '\ue61d',
+    'hxx':          '\ue61d',
+    'cppm':         '\ue61d',
+    'ixx':          '\ue61d',
+    'mm':           '\ue61d',
+
+    # --- C# ---
+    'cs':           '\uf031b',  # nf-md-language_csharp
+    'cshtml':       '\uf031b',
+    'csproj':       '\uf031b',
+    'sln':          '\uf031b',
+
+    # --- Java ---
+    'java':         '\ue738',   # nf-dev-java
+    'jar':          '\ue738',
+    'class':        '\ue738',
+
+    # --- Kotlin ---
+    'kt':           '\ue634',   # nf-dev-kotlin
+    'kts':          '\ue634',
+
+    # --- Swift ---
+    'swift':        '\ue755',   # nf-dev-swift
+
+    # --- Dart ---
+    'dart':         '\ue798',   # nf-dev-dart
+
+    # --- Ruby ---
+    'rb':           '\ue21e',   # nf-dev-ruby
+    'erb':          '\ue21e',
+    'gemspec':      '\ue21e',
+
+    # --- PHP ---
+    'php':          '\ue73d',   # nf-dev-php
+
+    # --- Perl ---
+    'pl':           '\ue769',   # nf-dev-perl
+    'pm':           '\ue769',
+
+    # --- Lua ---
+    'lua':          '\ue620',   # nf-dev-lua
+    'luac':         '\ue620',
+
+    # --- Elixir ---
+    'ex':           '\ue62d',   # nf-dev-elixir
+    'exs':          '\ue62d',
+
+    # --- Erlang ---
+    'erl':          '\ue7b1',
+    'hrl':          '\ue7b1',
+
+    # --- Haskell ---
+    'hs':           '\ue61f',   # nf-dev-haskell
+    'lhs':          '\ue61f',
+
+    # --- Scala ---
+    'scala':        '\ue737',   # nf-dev-scala
+    'sc':           '\ue737',
+    'sbt':          '\ue737',
+
+    # --- Clojure ---
+    'clj':          '\ue76a',   # nf-dev-clojure
+    'cljs':         '\ue76a',
+    'cljc':         '\ue76a',
+    'edn':          '\ue76a',
+
+    # --- F# ---
+    'fs':           '\ue7a7',
+    'fsi':          '\ue7a7',
+    'fsx':          '\ue7a7',
+
+    # --- Elm ---
+    'elm':          '\ue62c',   # nf-dev-elm
+
+    # --- Crystal ---
+    'cr':           '\uf048',
+
+    # --- Nim ---
+    'nim':          '\uf0e7',
+
+    # --- Nix ---
+    'nix':          '\uf313',   # nf-linux-nixos
+
+    # --- Zig ---
+    'zig':          '\uf0e7',
+
+    # --- Shell ---
+    'awk':          '\uf489',
+    'bash':         '\uf489',
+    'fish':         '\uf489',
+    'ksh':          '\uf489',
+    'ps1':          '\uf489',
+    'sh':           '\uf489',
+    'zsh':          '\uf489',
+
+    # --- Web ---
+    'css':          '\ue60b',   # nf-dev-css3
+    'htm':          '\ue60e',   # nf-dev-html5
+    'html':         '\ue60e',
+    'less':         '\ue60a',   # nf-dev-less
+    'sass':         '\ue603',   # nf-dev-sass
+    'scss':         '\ue603',
+    'svelte':       '\ue697',   # nf-dev-svelte
+    'vue':          '\ue6a0',   # nf-dev-vue
+    'xhtml':        '\ue60e',
+
+    # --- Data / Config ---
+    'cfg':          '\ue615',
+    'conf':         '\ue615',
+    'ini':          '\ue615',
+    'json':         '\ue60b',
+    'json5':        '\ue60b',
+    'jsonc':        '\ue60b',
+    'toml':         '\ue615',
+    'xml':          '\ue619',   # nf-dev-xml
+    'yaml':         '\ue615',
+    'yml':          '\ue615',
+    'env':          '\uf462',   # nf-oct-gear
+
+    # --- Documents ---
+    'doc':          '\uf1c2',   # nf-fa-file_word
+    'docx':         '\uf1c2',
+    'odt':          '\uf1c2',
+    'rtf':          '\uf1c2',
+    'xls':          '\uf1c3',   # nf-fa-file_excel
+    'xlsx':         '\uf1c3',
+    'ods':          '\uf1c3',
+    'csv':          '\uf1c3',
+    'ppt':          '\uf1c4',   # nf-fa-file_powerpoint
+    'pptx':         '\uf1c4',
+    'odp':          '\uf1c4',
+    'pdf':          '\uf1c1',   # nf-fa-file_pdf
+    'djvu':         '\uf1c1',
+    'epub':         '\uf02d',   # nf-fa-book
+    'cbr':          '\uf02d',
+    'cbz':          '\uf02d',
+    'mobi':         '\uf02d',
+    'md':           '\uf48a',   # nf-oct-markdown
+    'markdown':     '\uf48a',
+    'mdx':          '\uf48a',
+    'rst':          '\uf15c',   # nf-fa-file_text
+    'txt':          '\uf15c',
+    'tex':          '\uf15c',
+    'bib':          '\uf15c',
+    'org':          '\uf4b6',   # nf-oct-checklist
+    'log':          '\uf15c',
+    'nfo':          '\uf15c',
+
+    # --- Image ---
+    'ai':           '\uf1c5',   # nf-fa-file_image
+    'avif':         '\uf1c5',
+    'bmp':          '\uf1c5',
+    'gif':          '\uf1c5',
+    'heic':         '\uf1c5',
+    'ico':          '\uf1c5',
+    'jpeg':         '\uf1c5',
+    'jpg':          '\uf1c5',
+    'jxl':          '\uf1c5',
+    'png':          '\uf1c5',
+    'psd':          '\uf1c5',
+    'svg':          '\uf1c5',
+    'svgz':         '\uf1c5',
+    'tif':          '\uf1c5',
+    'tiff':         '\uf1c5',
+    'webp':         '\uf1c5',
+    'xcf':          '\uf1c5',
+
+    # --- Video ---
+    '3gp':          '\uf1c8',   # nf-fa-file_video
+    'avi':          '\uf1c8',
+    'flv':          '\uf1c8',
+    'm4v':          '\uf1c8',
+    'mkv':          '\uf1c8',
+    'mov':          '\uf1c8',
+    'mp4':          '\uf1c8',
+    'mpeg':         '\uf1c8',
+    'mpg':          '\uf1c8',
+    'ogv':          '\uf1c8',
+    'webm':         '\uf1c8',
+    'wmv':          '\uf1c8',
+
+    # --- Audio ---
+    'aac':          '\uf1c7',   # nf-fa-file_audio
+    'aif':          '\uf1c7',
+    'aiff':         '\uf1c7',
+    'flac':         '\uf1c7',
+    'm4a':          '\uf1c7',
+    'mp3':          '\uf1c7',
+    'oga':          '\uf1c7',
+    'ogg':          '\uf1c7',
+    'opus':         '\uf1c7',
+    'wav':          '\uf1c7',
+    'wma':          '\uf1c7',
+
+    # --- Archives ---
+    '7z':           '\uf1c6',   # nf-fa-file_archive
+    'bz':           '\uf1c6',
+    'bz2':          '\uf1c6',
+    'bz3':          '\uf1c6',
+    'deb':          '\uf1c6',
+    'gz':           '\uf1c6',
+    'iso':          '\uf1c6',
+    'pkg':          '\uf1c6',
+    'rar':          '\uf1c6',
+    'rpm':          '\uf1c6',
+    'tar':          '\uf1c6',
+    'tgz':          '\uf1c6',
+    'txz':          '\uf1c6',
+    'xz':           '\uf1c6',
+    'zip':          '\uf1c6',
+    'zst':          '\uf1c6',
+    'apk':          '\uf1c6',
+    'dmg':          '\uf1c6',
+    'img':          '\uf1c6',
+
+    # --- Database ---
+    'db':           '\uf1c0',   # nf-fa-database
+    'dump':         '\uf1c0',
+    'sql':          '\uf1c0',
+    'sqlite':       '\uf1c0',
+    'sqlite3':      '\uf1c0',
+
+    # --- Font ---
+    'eot':          '\uf031',   # nf-fa-font
+    'otf':          '\uf031',
+    'ttf':          '\uf031',
+    'woff':         '\uf031',
+    'woff2':        '\uf031',
+
+    # --- Docker ---
+    'dockerfile':   '\ue7b0',
+
+    # --- Keys / Certs ---
+    'asc':          '\uf023',   # nf-fa-lock
+    'cer':          '\uf023',
+    'crt':          '\uf023',
+    'gpg':          '\uf023',
+    'key':          '\uf023',
+    'pem':          '\uf023',
+    'pub':          '\uf023',
+
+    # --- Patch / Diff ---
+    'diff':         '\uf440',   # nf-oct-diff
+    'patch':        '\uf440',
+
+    # --- Lock files ---
+    'lock':         '\uf023',
+    'lck':          '\uf023',
+
+    # --- Misc ---
+    'bat':          '\uf489',
+    'bin':          '\uf17a',   # nf-fa-windows (exe)
+    'exe':          '\uf17a',
+    'dll':          '\uf17a',
+    'so':           '\uf17a',
+    'bak':          '\uf15c',
+    'cache':        '\uf15c',
+    'class':        '\ue738',
+    'torrent':      '\uf019',   # nf-fa-download
+    'wasm':         '\uf05b',
+    'ics':          '\uf073',   # nf-fa-calendar
+    'ifb':          '\uf073',
 }
-
-# ---------------------------------------------------------------------------
-# Default / fallback icons
-# ---------------------------------------------------------------------------
-ICON_DIRECTORY = ""        # dir (yazi cond: dir)
-ICON_DIRECTORY_LINK = ""   # dir symlink
-ICON_FILE = ""             # generic file (yazi cond: !dir)
-ICON_FILE_LINK = ""        # file symlink (yazi cond: link)
-ICON_LINK_BAD = ""         # broken symlink (yazi cond: orphan)
-ICON_EXEC = ""             # executable (yazi cond: exec)
-ICON_FIFO = ""             # named pipe (yazi cond: fifo)
-ICON_SOCKET = ""           # socket (yazi cond: sock)
-ICON_BLOCK = ""            # block device (yazi cond: block)
-
-# Separator appended after the icon
-ICON_SEPARATOR = " "
 
 
 def get_icon(fobj):
     """Return the Nerd Font icon glyph for *fobj*.
 
-    Priority order mirrors yazi's resolution:
+    Resolution order (mirrors yazi):
       1. Exact filename match (case-insensitive)
       2. Directory name match
       3. File extension match
@@ -848,8 +556,8 @@ def get_icon(fobj):
         return ICON_LINK_BAD if not fobj.exists else ICON_FILE_LINK
 
     # 4. Extension match
-    if "." in fobj.basename:
-        ext = fobj.basename.rsplit(".", 1)[-1].lower()
+    if '.' in fobj.basename:
+        ext = fobj.basename.rsplit('.', 1)[-1].lower()
         icon = ICONS_BY_EXTENSION.get(ext)
         if icon:
             return icon
