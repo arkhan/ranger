@@ -9,10 +9,24 @@ from unicodedata import east_asian_width
 
 from ranger import PY3
 
+# ASCIIONLY kept for external compatibility but no longer used internally;
+# replaced by the faster str.isascii() built-in.
 ASCIIONLY = set(chr(c) for c in range(1, 128))
 NARROW = 1
 WIDE = 2
 WIDE_SYMBOLS = set('WF')
+
+# Nerd Font version for Private Use Area (PUA) character width:
+#   0 → no special handling (default)
+#   2 → NF v2 glyphs are 1-cell wide (no extra handling needed)
+#   3 → NF v3 glyphs are 2-cell wide (PUA U+E000..U+F8FF treated as WIDE)
+# Updated at startup via ranger.container.settings signal.
+NERD_FONTS_VERSION = 0
+
+# PUA ranges used by Nerd Fonts (BMP only; supplementary PUA is uncommon)
+_NF_PUA_RANGES = (
+    (0xE000, 0xF8FF),   # BMP Private Use Area
+)
 
 
 def uwid(string):
@@ -22,22 +36,38 @@ def uwid(string):
     return sum(utf_char_width(c) for c in string)
 
 
-def utf_char_width(string):
-    """Return the width of a single character"""
-    if east_asian_width(string) in WIDE_SYMBOLS:
+def _is_nerd_font_pua(char):
+    """Return True if *char* is in a Nerd Fonts Private Use Area range."""
+    cp = ord(char)
+    for lo, hi in _NF_PUA_RANGES:
+        if lo <= cp <= hi:
+            return True
+    return False
+
+
+def utf_char_width(char):
+    """Return the display width of a single character.
+
+    Accounts for Nerd Font v3 glyphs (2-cell wide) when NERD_FONTS_VERSION == 3.
+    """
+    if NERD_FONTS_VERSION == 3 and _is_nerd_font_pua(char):
+        return WIDE
+    if east_asian_width(char) in WIDE_SYMBOLS:
         return WIDE
     return NARROW
 
 
 def string_to_charlist(string):
     """Return a list of characters with extra empty strings after wide chars"""
-    if not set(string) - ASCIIONLY:
+    # str.isascii() is SIMD-optimised in CPython 3.7+ and far faster than
+    # building a set and computing the difference for typical filenames.
+    if string.isascii():
         return list(string)
     result = []
     if PY3:
         for char in string:
             result.append(char)
-            if east_asian_width(char) in WIDE_SYMBOLS:
+            if utf_char_width(char) == WIDE:
                 result.append('')
     else:
         try:
