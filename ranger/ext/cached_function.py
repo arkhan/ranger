@@ -1,7 +1,8 @@
 # This file is part of ranger, the console file manager.
 # License: GNU GPL version 3, see the file "AUTHORS" for details.
 
-# Python 3.2+ required — lru_cache is available in the standard library.
+from __future__ import absolute_import
+
 from functools import lru_cache
 
 
