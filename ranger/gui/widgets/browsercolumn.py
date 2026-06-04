@@ -19,6 +19,13 @@ from ranger.gui.widgets import Widget
 from ranger.gui.widgets.pager import Pager
 
 
+# Maximum number of cached rendering entries per file object.
+# Each entry corresponds to one (width, selection, marked, …) combination.
+# After a terminal resize the old entries are never reused → cap prevents
+# unbounded memory growth in long sessions.
+_DISPLAY_CACHE_MAXSIZE = 16
+
+
 def hook_before_drawing(fsobject, color_list):
     return fsobject, color_list
 
@@ -291,9 +298,13 @@ class BrowserColumn(Pager):  # pylint: disable=too-many-instance-attributes
 
         self._set_scroll_begin()
 
-        copied = [f.path for f in self.fm.copy_buffer]
+        # Use a set for O(1) membership tests instead of O(n) list scan
+        copied = {f.path for f in self.fm.copy_buffer}
 
         selected_i = self._get_index_of_selected_file()
+
+        # Cache line_numbers setting string to avoid repeated .lower() calls
+        line_numbers_setting = self.settings.line_numbers.lower()
 
         # Set the size of the linum text field to the number of digits in the
         # visible files in directory.
@@ -344,14 +355,19 @@ class BrowserColumn(Pager):  # pylint: disable=too-many-instance-attributes
                    drawn.path in copied, tagged_marker, drawn.infostring,
                    drawn.vcsstatus, drawn.vcsremotestatus, self.target.has_vcschild,
                    self.fm.do_cut, current_linemode.name, metakey, active_pane,
-                   self.settings.line_numbers.lower(), linum_text_len)
+                   line_numbers_setting, linum_text_len)
+
+            # Evict stale cache entries (e.g. after terminal resize).
+            # Keep at most _DISPLAY_CACHE_MAXSIZE entries per file object.
+            if len(drawn.display_data) > _DISPLAY_CACHE_MAXSIZE:
+                drawn.display_data.clear()
 
             # Check if current line has not already computed and cached
             if key in drawn.display_data:
                 # Recompute line numbers because they can't be reliably cached.
                 if (
                     self.main_column
-                    and self.settings.line_numbers.lower() != 'false'
+                    and line_numbers_setting != 'false'
                 ):
                     line_number_text = self._format_line_number(linum_format,
                                                                 i,
@@ -377,7 +393,7 @@ class BrowserColumn(Pager):  # pylint: disable=too-many-instance-attributes
             space = self.wid
 
             # line number field
-            if self.settings.line_numbers.lower() != 'false':
+            if line_numbers_setting != 'false':
                 if self.main_column and space - linum_text_len > 2:
                     line_number_text = self._format_line_number(linum_format,
                                                                 i,
