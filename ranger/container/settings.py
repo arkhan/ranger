@@ -71,6 +71,7 @@ ALLOWED_SETTINGS = {
     'preview_images_method': str,
     'preview_max_size': int,
     'preview_script': (str, type(None)),
+    'preview_script_timeout': int,
     'relative_current_zero': bool,
     'save_backtick_bookmark': bool,
     'save_console_history': bool,

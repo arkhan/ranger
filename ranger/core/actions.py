@@ -1052,7 +1052,7 @@ class Actions(  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return '{0}.jpg'.format(sha512(inode_path).hexdigest())
 
     def get_preview(self, fobj, width, height):
-        # pylint: disable=too-many-return-statements,too-many-statements
+        # pylint: disable=too-many-return-statements,too-many-statements,too-many-locals,too-many-branches
         pager = self.ui.get_pager()
         path = fobj.realpath
 
@@ -1115,6 +1115,13 @@ class Actions(  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 self.settings.preview_script), bad=True)
             return None
 
+        prev_loader = getattr(self, '_preview_loader', None)
+        if prev_loader is not None:
+            prev_path = getattr(prev_loader, 'preview_path', None)
+            if prev_path != path:
+                self.loader.remove(item=prev_loader)
+                self._preview_loader = None
+
         data['loading'] = True
 
         if 'directimagepreview' in data:
@@ -1172,6 +1179,8 @@ class Actions(  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 self.ui.browser.need_redraw = True
 
             data['loading'] = False
+            if getattr(self, '_preview_loader', None) is signal.loader:
+                self._preview_loader = None
 
             pager = self.ui.get_pager()
             if self.thisfile and self.thisfile.is_file:
@@ -1191,14 +1200,20 @@ class Actions(  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 del self.previews[path]
             except KeyError:
                 pass
+            if getattr(self, '_preview_loader', None) is signal.loader:
+                self._preview_loader = None
 
+        _timeout = self.settings.preview_script_timeout
         loadable = CommandLoader(
             args=[self.settings.preview_script, path, str(width), str(height),
                   cacheimg, str(self.settings.preview_images)],
             read=True,
             silent=True,
             descr="Getting preview of %s" % path,
+            timeout=_timeout if _timeout > 0 else None,
         )
+        loadable.preview_path = path
+        self._preview_loader = loadable
         loadable.signal_bind('after', on_after)
         loadable.signal_bind('destroy', on_destroy)
         self.loader.add(loadable)
