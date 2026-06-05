@@ -181,6 +181,7 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
         input=None,  # pylint: disable=redefined-builtin
         kill_on_pause=False,
         popenArgs=None,
+        timeout=None,
     ):
         SignalDispatcher.__init__(self)
         Loadable.__init__(self, self.generate(), descr)
@@ -191,9 +192,10 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
         self.input = input
         self.kill_on_pause = kill_on_pause
         self.popenArgs = popenArgs  # pylint: disable=invalid-name
+        self.timeout = timeout
 
     def generate(self):
-        # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-branches,too-many-statements,too-many-locals
         # TODO: Check whether we can afford to wait for processes and use a
         #       with-statement for Popen.
         # pylint: disable=consider-using-with
@@ -202,9 +204,11 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
         popenargs['stdin'] = (
             PIPE if self.input else open(os.devnull, 'r', encoding="utf-8")
         )
+        popenargs.setdefault('start_new_session', True)
         self.process = process = Popen(self.args, **popenargs)
         fd_out, fd_err = process.stdout.fileno(), process.stderr.fileno()
         self.signal_emit('before', process=process, loader=self)
+        _start_time = time() if self.timeout is not None else None
         if self.input:
             if PY3:
                 import io
@@ -222,6 +226,9 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
                 yield
                 if self.finished:
                     break
+                if _start_time is not None and time() - _start_time > self.timeout:
+                    self._killpg()
+                    break
                 sleep(0.03)
         else:
             selectlist = []
@@ -230,18 +237,19 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
             if not self.silent:
                 selectlist.append(fd_err)
             chunk_size = 4096
+            stdout_max = 1024 * 512
             read_stdout = read_stderr = None
             while process.poll() is None:
                 yield
                 if self.finished:
                     break
+                if _start_time is not None and time() - _start_time > self.timeout:
+                    self._killpg()
+                    break
                 try:
                     robjs, _, _ = select.select(selectlist, [], [], 0.03)
                     if robjs:
                         robjs = robjs[0]
-                        # We use os.read because it blocks until it manages to
-                        # read something, rather than until it has read the
-                        # requested number of bytes or reaches EOF.
                         if robjs == fd_err:
                             read = os.read(robjs, chunk_size)
                             if read:
@@ -254,7 +262,7 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
                             if read:
                                 if read_stdout is None:
                                     read_stdout = read
-                                else:
+                                elif len(read_stdout) < stdout_max:
                                     read_stdout += read
                 except select.error:
                     sleep(0.03)
@@ -264,9 +272,16 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
                         line = safe_decode(line)
                     self.fm.notify(line, bad=True)
             if self.read:
-                read = process.stdout.read()
-                if read:
-                    read_stdout += read
+                remaining = stdout_max - (len(read_stdout) if read_stdout else 0)
+                if remaining > 0:
+                    read = process.stdout.read(remaining)
+                    if read:
+                        if read_stdout is None:
+                            read_stdout = read
+                        else:
+                            read_stdout += read
+                else:
+                    process.stdout.read()
             if read_stdout:
                 if PY3:
                     read_stdout = safe_decode(read_stdout)
@@ -282,36 +297,45 @@ class CommandLoader(  # pylint: disable=too-many-instance-attributes
         if not self.finished and not self.paused:
             if self.kill_on_pause:
                 self.finished = True
-                try:
-                    self.process.kill()
-                except OSError:
-                    # probably a race condition where the process finished
-                    # between the last poll()ing and this point.
-                    pass
+                self._killpg()
                 return
             try:
-                self.process.send_signal(signal.SIGTSTP)
+                os.killpg(os.getpgid(self.process.pid), signal.SIGTSTP)
             except OSError:
-                pass
+                try:
+                    self.process.send_signal(signal.SIGTSTP)
+                except OSError:
+                    pass
             Loadable.pause(self)
             self.signal_emit('pause', process=self.process, loader=self)
 
     def unpause(self):
         if not self.finished and self.paused:
             try:
-                self.process.send_signal(signal.SIGCONT)
+                os.killpg(os.getpgid(self.process.pid), signal.SIGCONT)
             except OSError:
-                pass
+                try:
+                    self.process.send_signal(signal.SIGCONT)
+                except OSError:
+                    pass
             Loadable.unpause(self)
             self.signal_emit('unpause', process=self.process, loader=self)
 
-    def destroy(self):
-        self.signal_emit('destroy', process=self.process, loader=self)
-        if self.process:
+    def _killpg(self):
+        """Kill the process and all its children (entire process group)."""
+        if self.process is None:
+            return
+        try:
+            os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
+        except OSError:
             try:
                 self.process.kill()
             except OSError:
                 pass
+
+    def destroy(self):
+        self.signal_emit('destroy', process=self.process, loader=self)
+        self._killpg()
 
 
 def safe_decode(string):

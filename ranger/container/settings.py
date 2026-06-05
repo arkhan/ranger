@@ -71,6 +71,7 @@ ALLOWED_SETTINGS = {
     'preview_images_method': str,
     'preview_max_size': int,
     'preview_script': (str, type(None)),
+    'preview_script_timeout': int,
     'relative_current_zero': bool,
     'renumber_tabs_on_tab_close': bool,
     'save_backtick_bookmark': bool,

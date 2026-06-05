@@ -13,7 +13,7 @@ import signal
 import socket
 import stat
 import sys
-from collections import deque
+from collections import deque, OrderedDict
 from io import open
 from subprocess import Popen
 from time import time
@@ -34,6 +34,27 @@ from ranger.ext.posix_signals import call_signal_handler, delay_signal
 from ranger.ext.rifle import Rifle
 from ranger.ext.signals import SignalDispatcher
 from ranger.gui.ui import UI
+
+_PREVIEW_CACHE_MAX = 200
+
+
+class LRUDict(OrderedDict):
+
+    def __init__(self, maxsize=_PREVIEW_CACHE_MAX, **kwargs):
+        self._maxsize = maxsize
+        super(LRUDict, self).__init__(**kwargs)
+
+    def __getitem__(self, key):
+        value = super(LRUDict, self).__getitem__(key)
+        self.move_to_end(key)
+        return value
+
+    def __setitem__(self, key, value):
+        if key in self:
+            self.move_to_end(key)
+        super(LRUDict, self).__setitem__(key, value)
+        if len(self) > self._maxsize:
+            self.popitem(last=False)
 
 
 class ProcessSet(object):
@@ -97,7 +118,7 @@ class FM(Actions,  # pylint: disable=too-many-instance-attributes
         self.tabs = {}
         self.tags = tags
         self.restorable_tabs = deque([], ranger.MAX_RESTORABLE_TABS)
-        self.previews = {}
+        self.previews = LRUDict()
         self.default_linemodes = deque()
         self.loader = Loader()
         self.copy_buffer = set()
