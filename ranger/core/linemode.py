@@ -14,24 +14,9 @@ from ranger.ext import spawn
 
 try:
     from ranger.gui.icons import get_icon, ICON_SEPARATOR
-    from ranger.ext.widestring import uwid as _uwid
     _ICONS_AVAILABLE = True
 except ImportError:
     _ICONS_AVAILABLE = False
-    _uwid = None
-
-
-def _icon_prefix(icon):
-    """Return icon + padding so the slot is always exactly 2 display cells.
-
-    BMP PUA icons (U+E000-U+F8FF) are 2-cell wide under NF v3.
-    Supplementary PUA icons (U+F0000+) are 1-cell wide.
-    Without normalisation every row has a different prefix width, which
-    misaligns the filename column.
-    """
-    w = _uwid(icon) if _uwid is not None else 1
-    pad = ' ' * max(0, 2 - w)
-    return icon + pad + ICON_SEPARATOR
 
 
 DEFAULT_LINEMODE = "filename"
@@ -96,7 +81,7 @@ class IconLinemode(LinemodeBase):  # pylint: disable=abstract-method
 
     def filetitle(self, fobj, metadata):
         if _ICONS_AVAILABLE:
-            return _icon_prefix(get_icon(fobj)) + fobj.relative_path
+            return get_icon(fobj) + ICON_SEPARATOR + fobj.relative_path
         return fobj.relative_path
 
 
@@ -107,7 +92,7 @@ class PermissionsIconLinemode(LinemodeBase):
     def filetitle(self, fobj, metadata):
         prefix = ""
         if _ICONS_AVAILABLE:
-            prefix = _icon_prefix(get_icon(fobj))
+            prefix = get_icon(fobj) + ICON_SEPARATOR
         return "%s%s %s %s %s" % (
             prefix,
             fobj.get_permission_string(),
