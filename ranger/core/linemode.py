@@ -14,22 +14,14 @@ from ranger.ext import spawn
 
 try:
     from ranger.gui.icons import get_icon, ICON_SEPARATOR
-    from ranger.ext.widestring import uwid as _uwid
     _ICONS_AVAILABLE = True
 except ImportError:
     _ICONS_AVAILABLE = False
-    _uwid = None
 
 
 def _icon_prefix(icon):
-    """Return icon padded to exactly 2 display cells + separator.
-
-    All icons in icons.toml are BMP PUA (U+E000-U+F8FF) so with
-    nerd_font_version 3 they are all 2-cell wide and padding is never
-    needed.  The guard keeps things correct if a 1-cell icon slips in.
-    """
-    w = _uwid(icon) if _uwid is not None else 1
-    return icon + ' ' * max(0, 2 - w) + ICON_SEPARATOR
+    """Return the icon followed by the separator, like yazi (no padding)."""
+    return icon + ICON_SEPARATOR
 
 
 DEFAULT_LINEMODE = "filename"

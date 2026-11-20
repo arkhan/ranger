@@ -26,509 +26,749 @@ import logging
 LOG = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Default / fallback icons
+# Default / fallback icons (yazi [icon].conds)
 # ---------------------------------------------------------------------------
-ICON_DIRECTORY = '\uf07b'       # nf-fa-folder
-ICON_DIRECTORY_LINK = '\uf482'  # nf-oct-file_symlink_directory
-ICON_FILE = '\uf15b'            # nf-fa-file
-ICON_FILE_LINK = '\uf481'       # nf-oct-file_symlink_file
-ICON_LINK_BAD = '\uf127'        # nf-fa-chain_broken  (orphan symlink)
-ICON_EXEC = '\uf489'            # nf-oct-terminal
-ICON_FIFO = '\uf731'            # nf-fa-exchange (pipe)
-ICON_SOCKET = '\uf6ff'          # nf-fa-plug
-ICON_BLOCK = '\uf0a0'           # nf-fa-hdd_o
+ICON_DIRECTORY = '\ue5ff'
+ICON_DIRECTORY_LINK = '\uf481'
+ICON_FILE = '\uf15b'
+ICON_FILE_LINK = '\uf481'
+ICON_LINK_BAD = '\uf127'
+ICON_EXEC = '\uf489'
+ICON_FIFO = '\uf1d1'
+ICON_SOCKET = '\uf1e4'
+ICON_BLOCK = '\uf0c9'
 
-# Separator appended after the icon (thin space works well with NF v3)
+# Separator appended after the icon (yazi: one space)
 ICON_SEPARATOR = ' '
 
 # ---------------------------------------------------------------------------
 # Icons by directory name  (lowercase basename -> glyph)
 # ---------------------------------------------------------------------------
 ICONS_BY_DIRNAME = {
-    # Version control
-    '.git':         '\ue702',   # nf-dev-git
-    '.github':      '\uf408',   # nf-oct-mark_github
-    '.svn':         '\uf408',
-    '.hg':          '\uf408',
-    # Package managers / build
-    'node_modules': '\ue60c',   # nf-dev-javascript
-    '.npm':         '\ue60c',
-    # Python
-    '.venv':        '\ue606',   # nf-dev-python
-    'venv':         '\ue606',
-    '__pycache__':  '\ue606',
-    # Misc build
-    'build':        '\uf187',   # nf-fa-archive
-    'dist':         '\uf187',
-    'target':       '\uf187',
-    '.cache':       '\uf187',
-    # Config / system
-    '.config':      '\ue615',   # nf-custom-settings
-    '.local':       '\ue615',
-    '.ssh':         '\uf023',   # nf-fa-lock
-    '.gnupg':       '\uf023',
-    '.docker':      '\ue7b0',   # nf-dev-docker
-    '.trash':       '\uf1f8',   # nf-fa-trash
-    'trash':        '\uf1f8',
-    # XDG user dirs
-    'desktop':      '\uf108',   # nf-fa-desktop
-    'documents':    '\uf02d',   # nf-fa-book
-    'downloads':    '\uf019',   # nf-fa-download
-    'music':        '\uf001',   # nf-fa-music
-    'pictures':     '\uf03e',   # nf-fa-picture_o
-    'photos':       '\uf03e',
-    'public':       '\uf064',   # nf-fa-share
-    'videos':       '\uf03d',   # nf-fa-film
-    'movies':       '\uf03d',
-    'library':      '\uf02d',
-    'development':  '\uf121',   # nf-fa-code
+    '.config': '\ue5fc',
+    '.git': '\ue5fb',
+    '.github': '\ue5fd',
+    '.npm': '\ue5fa',
+    'desktop': '\uf108',
+    'development': '\ue70c',
+    'documents': '\uf401',
+    'downloads': '\uf498',
+    'library': '\ueb9c',
+    'movies': '\uf447',
+    'music': '\uf025',
+    'pictures': '\ue244',
+    'public': '\uf42b',
+    'videos': '\uf447',
 }
 
 # ---------------------------------------------------------------------------
 # Icons by exact filename  (lowercase -> glyph)
 # ---------------------------------------------------------------------------
 ICONS_BY_FILENAME = {
-    # Version control
-    '.gitattributes':           '\ue702',
-    '.gitconfig':               '\ue702',
-    '.gitignore':               '\ue702',
-    '.gitmodules':              '\ue702',
-    '.git-blame-ignore-revs':   '\ue702',
-    '.gitkeep':                 '\ue702',
-    '.hgignore':                '\uf408',
-    '.mailmap':                 '\ue702',
-    'commit_editmsg':           '\ue702',
-    '.gitlab-ci.yml':           '\uf296',   # nf-fa-gitlab
-
-    # Shell config
-    '.bash_profile':            '\uf489',
-    '.bashrc':                  '\uf489',
-    '.bash_logout':             '\uf489',
-    '.profile':                 '\uf489',
-    '.zprofile':                '\uf489',
-    '.zshenv':                  '\uf489',
-    '.zshrc':                   '\uf489',
-
-    # Editor config
-    '.editorconfig':            '\ue615',
-    '.gvimrc':                  '\ue62b',   # nf-dev-vim
-    '.nvimrc':                  '\ue62b',
-    '.vimrc':                   '\ue62b',
-    '_vimrc':                   '\ue62b',
-    '_gvimrc':                  '\ue62b',
-
-    # Linters / Formatters
-    '.babelrc':                 '\ue60c',
-    '.clang-format':            '\ue61d',
-    '.clang-tidy':              '\ue61d',
-    '.eslintignore':            '\ue60c',
-    '.eslintrc':                '\ue60c',
-    '.luacheckrc':              '\ue620',   # nf-dev-lua
-    '.nanorc':                  '\ue62a',
-    '.npmignore':               '\ue60c',
-    '.npmrc':                   '\ue60c',
-    '.nvmrc':                   '\ue60c',
-    '.prettierrc':              '\ue60c',
-    '.pylintrc':                '\ue606',
-    'eslint.config.js':         '\ue60c',
-    'eslint.config.ts':         '\ue60c',
-    'eslint.config.mjs':        '\ue60c',
-    'prettier.config.js':       '\ue60c',
-    'prettier.config.ts':       '\ue60c',
-
-    # Environment / secrets
-    '.env':                     '\uf462',   # nf-oct-gear
-    '.dockerignore':            '\ue7b0',   # nf-dev-docker
-
-    # Build / Package managers
-    'cmakelists.txt':           '\ue779',
-    'compose.yaml':             '\ue7b0',
-    'compose.yml':              '\ue7b0',
-    'containerfile':            '\ue7b0',
-    'docker-compose.yaml':      '\ue7b0',
-    'docker-compose.yml':       '\ue7b0',
-    'dockerfile':               '\ue7b0',
-    'gemfile':                  '\ue21e',   # nf-dev-ruby
-    'gemfile.lock':             '\ue21e',
-    'gnumakefile':              '\ue779',   # nf-dev-gnu
-    'go.mod':                   '\ue627',   # nf-dev-go
-    'go.sum':                   '\ue627',
-    'go.work':                  '\ue627',
-    'gruntfile.js':             '\uf0d0',   # nf-fa-flag
-    'gruntfile.ts':             '\uf0d0',
-    'gulpfile.js':              '\uf0f9',
-    'gulpfile.ts':              '\uf0f9',
-    'justfile':                 '\uf013',   # nf-fa-gear
-    'makefile':                 '\ue779',
-    'mix.lock':                 '\ue62d',   # nf-dev-elixir
-    'package-lock.json':        '\ue60c',
-    'package.json':             '\ue60c',
-    'pkgbuild':                 '\uf303',   # nf-fa-linux
-    'pom.xml':                  '\ue738',   # nf-dev-java
-    'procfile':                 '\uf013',
-    'rakefile':                 '\ue21e',
-    'vagrantfile':              '\ue7b0',
-    'workspace':                '\ue22b',   # nf-fa-briefcase
-
-    # CI
-    '.travis.yml':              '\ue77e',   # nf-dev-travis
-    'jenkinsfile':              '\ue767',   # nf-dev-jenkins
-
-    # Frameworks
-    'next.config.js':           '\ue60c',
-    'next.config.ts':           '\ue60c',
-    'nuxt.config.js':           '\ue6a0',   # nf-dev-vue
-    'nuxt.config.ts':           '\ue6a0',
-    'svelte.config.js':         '\ue697',   # nf-dev-svelte
-    'tailwind.config.js':       '\uf1e7',   # nf-fa-css3 (tailwind approx)
-    'tailwind.config.ts':       '\uf1e7',
-    'tsconfig.json':            '\ue628',   # nf-dev-typescript
-    'vite.config.js':           '\ue7a2',   # nf-dev-vitejs (approx)
-    'vite.config.ts':           '\ue7a2',
-    'vitest.config.js':         '\ue7a2',
-    'vitest.config.ts':         '\ue7a2',
-    'playwright.config.js':     '\uf489',
-    'playwright.config.ts':     '\uf489',
-
-    # Docs / Meta
-    'authors':                  '\uf007',   # nf-fa-user
-    'authors.txt':              '\uf007',
-    'copying':                  '\uf718',   # nf-fa-creative_commons
-    'copying.lesser':           '\uf718',
-    'license':                  '\uf718',
-    'license.md':               '\uf718',
-    'unlicense':                '\uf718',
-    'readme':                   '\uf48a',   # nf-oct-markdown
-    'readme.md':                '\uf48a',
-    'readme.txt':               '\uf48a',
-    'security':                 '\uf023',
-    'security.md':              '\uf023',
-    'code_of_conduct':          '\uf4be',
-    'code_of_conduct.md':       '\uf4be',
-    'changelog':                '\uf46a',
-    'changelog.md':             '\uf46a',
-    'favicon.ico':              '\uf005',   # nf-fa-star
-
-    # Config (app-specific)
-    'config':                   '\ue615',
-    'mpv.conf':                 '\uf03d',   # nf-fa-film
-    'tmux.conf':                '\uf489',
-    'tmux.conf.local':          '\uf489',
-    'hypridle.conf':            '\uf013',
-    'hyprland.conf':            '\uf013',
-    'hyprlock.conf':            '\uf013',
-    'hyprpaper.conf':           '\uf03e',
-    'i3blocks.conf':            '\uf0c9',
-    'i3status.conf':            '\uf0c9',
-    'xorg.conf':                '\uf17c',   # nf-fa-linux
-    'node_modules':             '\ue60c',
-
-    # Prisma
-    'prisma.config.ts':         '\uf1c0',
+    '.babelrc': '\ue639',
+    '.bash_profile': '\ue615',
+    '.bashrc': '\ue615',
+    '.clang-format': '\ue615',
+    '.clang-tidy': '\ue615',
+    '.codespellrc': '\U000f04c6',
+    '.condarc': '\ue715',
+    '.dockerignore': '\U000f0868',
+    '.ds_store': '\ue615',
+    '.editorconfig': '\ue652',
+    '.env': '\uf462',
+    '.eslintignore': '\ue655',
+    '.eslintrc': '\ue655',
+    '.git-blame-ignore-revs': '\ue702',
+    '.gitattributes': '\ue702',
+    '.gitconfig': '\ue615',
+    '.gitignore': '\ue702',
+    '.gitlab-ci.yml': '\uf296',
+    '.gitmodules': '\ue702',
+    '.gtkrc-2.0': '\uf362',
+    '.gvimrc': '\ue62b',
+    '.justfile': '\uf0ad',
+    '.luacheckrc': '\ue615',
+    '.luaurc': '\ue615',
+    '.mailmap': '\U000f02a2',
+    '.nanorc': '\ue838',
+    '.npmignore': '\ue71e',
+    '.npmrc': '\ue71e',
+    '.nuxtrc': '\U000f1106',
+    '.nvmrc': '\ue718',
+    '.pnpmfile.cjs': '\ue865',
+    '.pre-commit-config.yaml': '\U000f06e2',
+    '.prettierignore': '\ue6b4',
+    '.prettierrc': '\ue6b4',
+    '.prettierrc.cjs': '\ue6b4',
+    '.prettierrc.js': '\ue6b4',
+    '.prettierrc.json': '\ue6b4',
+    '.prettierrc.json5': '\ue6b4',
+    '.prettierrc.mjs': '\ue6b4',
+    '.prettierrc.toml': '\ue6b4',
+    '.prettierrc.yaml': '\ue6b4',
+    '.prettierrc.yml': '\ue6b4',
+    '.pylintrc': '\ue615',
+    '.settings.json': '\ue70c',
+    '.srcinfo': '\U000f08c7',
+    '.vimrc': '\ue62b',
+    '.xauthority': '\uf369',
+    '.xinitrc': '\uf369',
+    '.xresources': '\uf369',
+    '.xsession': '\uf369',
+    '.zprofile': '\ue615',
+    '.zshenv': '\ue615',
+    '.zshrc': '\ue615',
+    '_gvimrc': '\ue62b',
+    '_vimrc': '\ue62b',
+    'authors': '\uedca',
+    'authors.txt': '\uedca',
+    'brewfile': '\ue791',
+    'bspwmrc': '\uf355',
+    'build': '\ue63a',
+    'build.gradle': '\ue660',
+    'build.zig.zon': '\ue6a9',
+    'bun.lock': '\ue76f',
+    'bun.lockb': '\ue76f',
+    'cantorrc': '\uf373',
+    'checkhealth': '\U000f04d9',
+    'cmakelists.txt': '\ue794',
+    'code_of_conduct': '\uf4ae',
+    'code_of_conduct.md': '\uf4ae',
+    'commit_editmsg': '\ue702',
+    'commitlint.config.js': '\U000f0718',
+    'commitlint.config.ts': '\U000f0718',
+    'compose.yaml': '\U000f0868',
+    'compose.yml': '\U000f0868',
+    'config': '\ue615',
+    'containerfile': '\U000f0868',
+    'copying': '\ue60a',
+    'copying.lesser': '\ue60a',
+    'directory.build.props': '\ue615',
+    'directory.build.targets': '\ue615',
+    'directory.packages.props': '\ue615',
+    'docker-compose.yaml': '\U000f0868',
+    'docker-compose.yml': '\U000f0868',
+    'dockerfile': '\U000f0868',
+    'eslint.config.cjs': '\ue655',
+    'eslint.config.js': '\ue655',
+    'eslint.config.mjs': '\ue655',
+    'eslint.config.ts': '\ue655',
+    'ext_typoscript_setup.txt': '\ue772',
+    'favicon.ico': '\ue623',
+    'fp-info-cache': '\uf34c',
+    'fp-lib-table': '\uf34c',
+    'freecad.conf': '\uf336',
+    'gemfile': '\ue791',
+    'gnumakefile': '\ue779',
+    'go.mod': '\ue627',
+    'go.sum': '\ue627',
+    'go.work': '\ue627',
+    'gradle-wrapper.properties': '\ue660',
+    'gradle.properties': '\ue660',
+    'gradlew': '\ue660',
+    'groovy': '\ue775',
+    'gruntfile.babel.js': '\ue611',
+    'gruntfile.coffee': '\ue611',
+    'gruntfile.js': '\ue611',
+    'gruntfile.ts': '\ue611',
+    'gtkrc': '\uf362',
+    'gulpfile.babel.js': '\ue610',
+    'gulpfile.coffee': '\ue610',
+    'gulpfile.js': '\ue610',
+    'gulpfile.ts': '\ue610',
+    'hypridle.conf': '\uf359',
+    'hyprland.conf': '\uf359',
+    'hyprlandd.conf': '\uf359',
+    'hyprlock.conf': '\uf359',
+    'hyprpaper.conf': '\uf359',
+    'hyprsunset.conf': '\uf359',
+    'i18n.config.js': '\U000f05ca',
+    'i18n.config.ts': '\U000f05ca',
+    'i3blocks.conf': '\uf35a',
+    'i3status.conf': '\uf35a',
+    'index.theme': '\uee72',
+    'ionic.config.json': '\ue7a9',
+    'jenkinsfile': '\uf2ec',
+    'justfile': '\uf0ad',
+    'kalgebrarc': '\uf373',
+    'kdeglobals': '\uf373',
+    'kdenlive-layoutsrc': '\uf33c',
+    'kdenliverc': '\uf33c',
+    'kritadisplayrc': '\uf33d',
+    'kritarc': '\uf33d',
+    'license': '\ue60a',
+    'license.md': '\ue60a',
+    'lxde-rc.xml': '\uf363',
+    'lxqt.conf': '\uf364',
+    'makefile': '\ue779',
+    'mix.lock': '\ue62d',
+    'mpv.conf': '\uf36e',
+    'next.config.cjs': '\ue83e',
+    'next.config.js': '\ue83e',
+    'next.config.ts': '\ue83e',
+    'node_modules': '\ue718',
+    'nuxt.config.cjs': '\U000f1106',
+    'nuxt.config.js': '\U000f1106',
+    'nuxt.config.mjs': '\U000f1106',
+    'nuxt.config.ts': '\U000f1106',
+    'package-lock.json': '\ue71e',
+    'package.json': '\ue71e',
+    'pkgbuild': '\uf303',
+    'platformio.ini': '\ue682',
+    'playwright.config.cjs': '\ueeb6',
+    'playwright.config.cts': '\ueeb6',
+    'playwright.config.js': '\ueeb6',
+    'playwright.config.mjs': '\ueeb6',
+    'playwright.config.mts': '\ueeb6',
+    'playwright.config.ts': '\ueeb6',
+    'pnpm-lock.yaml': '\ue865',
+    'pnpm-workspace.yaml': '\ue865',
+    'pom.xml': '\ue674',
+    'prettier.config.cjs': '\ue6b4',
+    'prettier.config.js': '\ue6b4',
+    'prettier.config.mjs': '\ue6b4',
+    'prettier.config.ts': '\ue6b4',
+    'prisma.config.mts': '\ue684',
+    'prisma.config.ts': '\ue684',
+    'procfile': '\ue607',
+    'prusaslicer.ini': '\uf351',
+    'prusaslicergcodeviewer.ini': '\uf351',
+    'py.typed': '\ue606',
+    'qtproject.conf': '\uf375',
+    'rakefile': '\ue791',
+    'readme': '\U000f00ba',
+    'readme.md': '\U000f00ba',
+    'rmd': '\ue609',
+    'robots.txt': '\U000f06a9',
+    'security': '\U000f0483',
+    'security.md': '\U000f0483',
+    'settings.gradle': '\ue660',
+    'svelte.config.js': '\ue697',
+    'sxhkdrc': '\uf355',
+    'sym-lib-table': '\uf34c',
+    'tailwind.config.js': '\U000f13ff',
+    'tailwind.config.mjs': '\U000f13ff',
+    'tailwind.config.ts': '\U000f13ff',
+    'tmux.conf': '\uebc8',
+    'tmux.conf.local': '\uebc8',
+    'tsconfig.json': '\ue69d',
+    'unlicense': '\ue60a',
+    'vagrantfile': '\uf2b8',
+    'vercel.json': '\ue8d3',
+    'vite.config.cjs': '\ue8d9',
+    'vite.config.cts': '\ue8d9',
+    'vite.config.js': '\ue8d9',
+    'vite.config.mjs': '\ue8d9',
+    'vite.config.mts': '\ue8d9',
+    'vite.config.ts': '\ue8d9',
+    'vitest.config.cjs': '\ue8d9',
+    'vitest.config.cts': '\ue8d9',
+    'vitest.config.js': '\ue8d9',
+    'vitest.config.mjs': '\ue8d9',
+    'vitest.config.mts': '\ue8d9',
+    'vitest.config.ts': '\ue8d9',
+    'vlcrc': '\U000f057c',
+    'webpack': '\U000f072b',
+    'weston.ini': '\uf367',
+    'workspace': '\ue63a',
+    'wrangler.jsonc': '\ue792',
+    'wrangler.toml': '\ue792',
+    'xdph.conf': '\uf359',
+    'xmobarrc': '\uf35e',
+    'xmobarrc.hs': '\uf35e',
+    'xmonad.hs': '\uf35e',
+    'xorg.conf': '\uf369',
+    'xsettingsd.conf': '\uf369',
 }
 
 # ---------------------------------------------------------------------------
 # Icons by file extension  (lowercase -> glyph)
 # ---------------------------------------------------------------------------
 ICONS_BY_EXTENSION = {
-    # --- Python ---
-    'py':           '\ue606',   # nf-dev-python
-    'pyc':          '\ue606',
-    'pyd':          '\ue606',
-    'pyi':          '\ue606',
-    'pyo':          '\ue606',
-    'pyw':          '\ue606',
-    'pyx':          '\ue606',
-    'pxd':          '\ue606',
-    'ipynb':        '\ue606',
-
-    # --- JavaScript ---
-    'cjs':          '\ue60c',   # nf-dev-javascript
-    'js':           '\ue60c',
-    'jsx':          '\ue60c',
-    'mjs':          '\ue60c',
-
-    # --- TypeScript ---
-    'cts':          '\ue628',   # nf-dev-typescript
-    'mts':          '\ue628',
-    'ts':           '\ue628',
-    'tsx':          '\ue628',
-
-    # --- Rust ---
-    'rs':           '\ue7a8',   # nf-dev-rust
-
-    # --- Go ---
-    'go':           '\ue627',   # nf-dev-go
-
-    # --- C / C++ ---
-    'c':            '\ue61e',   # nf-dev-c
-    'h':            '\ue61e',
-    'cc':           '\ue61d',   # nf-dev-cpp
-    'cpp':          '\ue61d',
-    'cxx':          '\ue61d',
-    'hh':           '\ue61d',
-    'hpp':          '\ue61d',
-    'hxx':          '\ue61d',
-    'cppm':         '\ue61d',
-    'ixx':          '\ue61d',
-    'mm':           '\ue61d',
-
-    # --- C# ---
-    'cs':           '\uf031b',  # nf-md-language_csharp
-    'cshtml':       '\uf031b',
-    'csproj':       '\uf031b',
-    'sln':          '\uf031b',
-
-    # --- Java ---
-    'java':         '\ue738',   # nf-dev-java
-    'jar':          '\ue738',
-    'class':        '\ue738',
-
-    # --- Kotlin ---
-    'kt':           '\ue634',   # nf-dev-kotlin
-    'kts':          '\ue634',
-
-    # --- Swift ---
-    'swift':        '\ue755',   # nf-dev-swift
-
-    # --- Dart ---
-    'dart':         '\ue798',   # nf-dev-dart
-
-    # --- Ruby ---
-    'rb':           '\ue21e',   # nf-dev-ruby
-    'erb':          '\ue21e',
-    'gemspec':      '\ue21e',
-
-    # --- PHP ---
-    'php':          '\ue73d',   # nf-dev-php
-
-    # --- Perl ---
-    'pl':           '\ue769',   # nf-dev-perl
-    'pm':           '\ue769',
-
-    # --- Lua ---
-    'lua':          '\ue620',   # nf-dev-lua
-    'luac':         '\ue620',
-
-    # --- Elixir ---
-    'ex':           '\ue62d',   # nf-dev-elixir
-    'exs':          '\ue62d',
-
-    # --- Erlang ---
-    'erl':          '\ue7b1',
-    'hrl':          '\ue7b1',
-
-    # --- Haskell ---
-    'hs':           '\ue61f',   # nf-dev-haskell
-    'lhs':          '\ue61f',
-
-    # --- Scala ---
-    'scala':        '\ue737',   # nf-dev-scala
-    'sc':           '\ue737',
-    'sbt':          '\ue737',
-
-    # --- Clojure ---
-    'clj':          '\ue76a',   # nf-dev-clojure
-    'cljs':         '\ue76a',
-    'cljc':         '\ue76a',
-    'edn':          '\ue76a',
-
-    # --- F# ---
-    'fs':           '\ue7a7',
-    'fsi':          '\ue7a7',
-    'fsx':          '\ue7a7',
-
-    # --- Elm ---
-    'elm':          '\ue62c',   # nf-dev-elm
-
-    # --- Crystal ---
-    'cr':           '\uf048',
-
-    # --- Nim ---
-    'nim':          '\uf0e7',
-
-    # --- Nix ---
-    'nix':          '\uf313',   # nf-linux-nixos
-
-    # --- Zig ---
-    'zig':          '\uf0e7',
-
-    # --- Shell ---
-    'awk':          '\uf489',
-    'bash':         '\uf489',
-    'fish':         '\uf489',
-    'ksh':          '\uf489',
-    'ps1':          '\uf489',
-    'sh':           '\uf489',
-    'zsh':          '\uf489',
-
-    # --- Web ---
-    'css':          '\ue60b',   # nf-dev-css3
-    'htm':          '\ue60e',   # nf-dev-html5
-    'html':         '\ue60e',
-    'less':         '\ue60a',   # nf-dev-less
-    'sass':         '\ue603',   # nf-dev-sass
-    'scss':         '\ue603',
-    'svelte':       '\ue697',   # nf-dev-svelte
-    'vue':          '\ue6a0',   # nf-dev-vue
-    'xhtml':        '\ue60e',
-
-    # --- Data / Config ---
-    'cfg':          '\ue615',
-    'conf':         '\ue615',
-    'ini':          '\ue615',
-    'json':         '\ue60b',
-    'json5':        '\ue60b',
-    'jsonc':        '\ue60b',
-    'toml':         '\ue615',
-    'xml':          '\ue619',   # nf-dev-xml
-    'yaml':         '\ue615',
-    'yml':          '\ue615',
-    'env':          '\uf462',   # nf-oct-gear
-
-    # --- Documents ---
-    'doc':          '\uf1c2',   # nf-fa-file_word
-    'docx':         '\uf1c2',
-    'odt':          '\uf1c2',
-    'rtf':          '\uf1c2',
-    'xls':          '\uf1c3',   # nf-fa-file_excel
-    'xlsx':         '\uf1c3',
-    'ods':          '\uf1c3',
-    'csv':          '\uf1c3',
-    'ppt':          '\uf1c4',   # nf-fa-file_powerpoint
-    'pptx':         '\uf1c4',
-    'odp':          '\uf1c4',
-    'pdf':          '\uf1c1',   # nf-fa-file_pdf
-    'djvu':         '\uf1c1',
-    'epub':         '\uf02d',   # nf-fa-book
-    'cbr':          '\uf02d',
-    'cbz':          '\uf02d',
-    'mobi':         '\uf02d',
-    'md':           '\uf48a',   # nf-oct-markdown
-    'markdown':     '\uf48a',
-    'mdx':          '\uf48a',
-    'rst':          '\uf15c',   # nf-fa-file_text
-    'txt':          '\uf15c',
-    'tex':          '\uf15c',
-    'bib':          '\uf15c',
-    'org':          '\uf4b6',   # nf-oct-checklist
-    'log':          '\uf15c',
-    'nfo':          '\uf15c',
-
-    # --- Image ---
-    'ai':           '\uf1c5',   # nf-fa-file_image
-    'avif':         '\uf1c5',
-    'bmp':          '\uf1c5',
-    'gif':          '\uf1c5',
-    'heic':         '\uf1c5',
-    'ico':          '\uf1c5',
-    'jpeg':         '\uf1c5',
-    'jpg':          '\uf1c5',
-    'jxl':          '\uf1c5',
-    'png':          '\uf1c5',
-    'psd':          '\uf1c5',
-    'svg':          '\uf1c5',
-    'svgz':         '\uf1c5',
-    'tif':          '\uf1c5',
-    'tiff':         '\uf1c5',
-    'webp':         '\uf1c5',
-    'xcf':          '\uf1c5',
-
-    # --- Video ---
-    '3gp':          '\uf1c8',   # nf-fa-file_video
-    'avi':          '\uf1c8',
-    'flv':          '\uf1c8',
-    'm4v':          '\uf1c8',
-    'mkv':          '\uf1c8',
-    'mov':          '\uf1c8',
-    'mp4':          '\uf1c8',
-    'mpeg':         '\uf1c8',
-    'mpg':          '\uf1c8',
-    'ogv':          '\uf1c8',
-    'webm':         '\uf1c8',
-    'wmv':          '\uf1c8',
-
-    # --- Audio ---
-    'aac':          '\uf1c7',   # nf-fa-file_audio
-    'aif':          '\uf1c7',
-    'aiff':         '\uf1c7',
-    'flac':         '\uf1c7',
-    'm4a':          '\uf1c7',
-    'mp3':          '\uf1c7',
-    'oga':          '\uf1c7',
-    'ogg':          '\uf1c7',
-    'opus':         '\uf1c7',
-    'wav':          '\uf1c7',
-    'wma':          '\uf1c7',
-
-    # --- Archives ---
-    '7z':           '\uf1c6',   # nf-fa-file_archive
-    'bz':           '\uf1c6',
-    'bz2':          '\uf1c6',
-    'bz3':          '\uf1c6',
-    'deb':          '\uf1c6',
-    'gz':           '\uf1c6',
-    'iso':          '\uf1c6',
-    'pkg':          '\uf1c6',
-    'rar':          '\uf1c6',
-    'rpm':          '\uf1c6',
-    'tar':          '\uf1c6',
-    'tgz':          '\uf1c6',
-    'txz':          '\uf1c6',
-    'xz':           '\uf1c6',
-    'zip':          '\uf1c6',
-    'zst':          '\uf1c6',
-    'apk':          '\uf1c6',
-    'dmg':          '\uf1c6',
-    'img':          '\uf1c6',
-
-    # --- Database ---
-    'db':           '\uf1c0',   # nf-fa-database
-    'dump':         '\uf1c0',
-    'sql':          '\uf1c0',
-    'sqlite':       '\uf1c0',
-    'sqlite3':      '\uf1c0',
-
-    # --- Font ---
-    'eot':          '\uf031',   # nf-fa-font
-    'otf':          '\uf031',
-    'ttf':          '\uf031',
-    'woff':         '\uf031',
-    'woff2':        '\uf031',
-
-    # --- Docker ---
-    'dockerfile':   '\ue7b0',
-
-    # --- Keys / Certs ---
-    'asc':          '\uf023',   # nf-fa-lock
-    'cer':          '\uf023',
-    'crt':          '\uf023',
-    'gpg':          '\uf023',
-    'key':          '\uf023',
-    'pem':          '\uf023',
-    'pub':          '\uf023',
-
-    # --- Patch / Diff ---
-    'diff':         '\uf440',   # nf-oct-diff
-    'patch':        '\uf440',
-
-    # --- Lock files ---
-    'lock':         '\uf023',
-    'lck':          '\uf023',
-
-    # --- Misc ---
-    'bat':          '\uf489',
-    'bin':          '\uf17a',   # nf-fa-windows (exe)
-    'exe':          '\uf17a',
-    'dll':          '\uf17a',
-    'so':           '\uf17a',
-    'bak':          '\uf15c',
-    'cache':        '\uf15c',
-    'class':        '\ue738',
-    'torrent':      '\uf019',   # nf-fa-download
-    'wasm':         '\uf05b',
-    'ics':          '\uf073',   # nf-fa-calendar
-    'ifb':          '\uf073',
+    '3gp': '\ue69f',
+    '3mf': '\U000f01a7',
+    '7z': '\uf410',
+    'a': '\ueb9c',
+    'aac': '\uf001',
+    'ada': '\ue6b5',
+    'adb': '\ue6b5',
+    'ads': '\ue6b5',
+    'ai': '\ue7b4',
+    'aif': '\uf001',
+    'aiff': '\uf001',
+    'android': '\ue70e',
+    'ape': '\uf001',
+    'apk': '\ue70e',
+    'apl': '\ue730',
+    'app': '\ueae8',
+    'applescript': '\uf179',
+    'asc': '\U000f099d',
+    'asm': '\ue637',
+    'ass': '\U000f0a16',
+    'astro': '\ue6b3',
+    'avif': '\ue60d',
+    'awk': '\ue795',
+    'azcli': '\uebe8',
+    'bak': '\U000f006f',
+    'bash': '\ue760',
+    'bat': '\ue615',
+    'bazel': '\ue63a',
+    'bib': '\U000f125f',
+    'bicep': '\ue63b',
+    'bicepparam': '\ue63b',
+    'bin': '\ueae8',
+    'blade.php': '\uf2f7',
+    'blend': '\U000f00ab',
+    'blp': '\U000f0ebe',
+    'bmp': '\ue60d',
+    'bqn': '\ue730',
+    'brep': '\U000f0eeb',
+    'bz': '\uf410',
+    'bz2': '\uf410',
+    'bz3': '\uf410',
+    'bzl': '\ue63a',
+    'c': '\ue61e',
+    'c++': '\ue61d',
+    'cache': '\uf49b',
+    'cast': '\ue69f',
+    'cbl': '\uf423',
+    'cc': '\ue61d',
+    'ccm': '\ue61d',
+    'cfc': '\ue645',
+    'cfg': '\ue615',
+    'cfm': '\ue645',
+    'cjs': '\ue60c',
+    'clj': '\ue768',
+    'cljc': '\ue768',
+    'cljd': '\ue76a',
+    'cljs': '\ue76a',
+    'cmake': '\ue794',
+    'cob': '\uf423',
+    'cobol': '\uf423',
+    'coffee': '\ue61b',
+    'conda': '\ue715',
+    'conf': '\ue615',
+    'config.ru': '\ue791',
+    'cow': '\U000f019a',
+    'cp': '\ue61d',
+    'cpp': '\ue61d',
+    'cppm': '\ue61d',
+    'cpy': '\uf423',
+    'cr': '\ue62f',
+    'crdownload': '\uf019',
+    'cs': '\U000f031b',
+    'csh': '\ue795',
+    'cshtml': '\U000f1997',
+    'cson': '\ue60b',
+    'csproj': '\U000f0aae',
+    'css': '\ue6b8',
+    'csv': '\ue64a',
+    'cts': '\ue628',
+    'cu': '\ue64b',
+    'cue': '\U000f0cb9',
+    'cuh': '\ue64b',
+    'cxx': '\ue61d',
+    'cxxm': '\ue61d',
+    'd': '\ue7af',
+    'd.ts': '\ue628',
+    'dart': '\ue798',
+    'db': '\ue706',
+    'dconf': '\uf361',
+    'desktop': '\uf108',
+    'diff': '\ue728',
+    'dll': '\ueb9c',
+    'doc': '\U000f022c',
+    'dockerfile': '\U000f0868',
+    'dockerignore': '\U000f0868',
+    'docx': '\U000f022c',
+    'dot': '\U000f1049',
+    'download': '\uf019',
+    'drl': '\ue28c',
+    'dropbox': '\ue707',
+    'dump': '\ue706',
+    'dwg': '\U000f0eeb',
+    'dxf': '\U000f0eeb',
+    'ebook': '\ue28b',
+    'ebuild': '\uf30d',
+    'edn': '\ue76a',
+    'eex': '\ue62d',
+    'ejs': '\ue60e',
+    'el': '\ue632',
+    'elc': '\ue632',
+    'elf': '\ueae8',
+    'elm': '\ue62c',
+    'eln': '\ue632',
+    'env': '\uf462',
+    'eot': '\uf031',
+    'epp': '\ue631',
+    'epub': '\ue28b',
+    'erb': '\ue60e',
+    'erl': '\ue7b1',
+    'ex': '\ue62d',
+    'exe': '\ueae8',
+    'exs': '\ue62d',
+    'f#': '\ue7a7',
+    'f3d': '\U000f0eeb',
+    'f90': '\U000f121a',
+    'fbx': '\U000f01a7',
+    'fcbak': '\uf336',
+    'fcmacro': '\uf336',
+    'fcmat': '\uf336',
+    'fcparam': '\uf336',
+    'fcscript': '\uf336',
+    'fcstd': '\uf336',
+    'fcstd1': '\uf336',
+    'fctb': '\uf336',
+    'fctl': '\uf336',
+    'fdmdownload': '\uf019',
+    'feature': '\ue7b7',
+    'fish': '\ue795',
+    'flac': '\uf001',
+    'flc': '\uf031',
+    'flf': '\uf031',
+    'fnl': '\ue6af',
+    'fodg': '\uf379',
+    'fodp': '\uf37a',
+    'fods': '\uf378',
+    'fodt': '\uf37c',
+    'frag': '\ue855',
+    'fs': '\ue7a7',
+    'fsi': '\ue7a7',
+    'fsscript': '\ue7a7',
+    'fsx': '\ue7a7',
+    'gcode': '\U000f042b',
+    'gd': '\ue65f',
+    'gemspec': '\ue791',
+    'geom': '\ue855',
+    'gif': '\ue60d',
+    'git': '\ue702',
+    'glb': '\uf1b2',
+    'gleam': '\uf005',
+    'glsl': '\ue855',
+    'gnumakefile': '\ue779',
+    'go': '\ue627',
+    'godot': '\ue65f',
+    'gpr': '\ue6b5',
+    'gql': '\uf20e',
+    'gradle': '\ue660',
+    'graphql': '\uf20e',
+    'gresource': '\uf362',
+    'gv': '\U000f1049',
+    'gz': '\uf410',
+    'h': '\uf0fd',
+    'haml': '\ue60e',
+    'hbs': '\ue60f',
+    'heex': '\ue62d',
+    'hex': '\ue667',
+    'hh': '\uf0fd',
+    'hpp': '\uf0fd',
+    'hrl': '\ue7b1',
+    'hs': '\ue61f',
+    'htm': '\ue60e',
+    'html': '\ue736',
+    'http': '\uf1d8',
+    'huff': '\U000f0858',
+    'hurl': '\uf0ec',
+    'hx': '\ue666',
+    'hxx': '\uf0fd',
+    'ical': '\uf073',
+    'icalendar': '\uf073',
+    'ico': '\ue60d',
+    'ics': '\uf073',
+    'ifb': '\uf073',
+    'ifc': '\U000f0eeb',
+    'ige': '\U000f0eeb',
+    'iges': '\U000f0eeb',
+    'igs': '\U000f0eeb',
+    'image': '\ue271',
+    'img': '\ue271',
+    'import': '\uf0c6',
+    'info': '\uf129',
+    'ini': '\ue615',
+    'ino': '\uf34b',
+    'ipynb': '\ue80f',
+    'iso': '\ue271',
+    'ixx': '\ue61d',
+    'jar': '\ue738',
+    'java': '\ue738',
+    'jl': '\ue624',
+    'jpeg': '\ue60d',
+    'jpg': '\ue60d',
+    'js': '\ue60c',
+    'json': '\ue60b',
+    'json5': '\ue60b',
+    'jsonc': '\ue60b',
+    'jsx': '\ue625',
+    'jwmrc': '\uf35b',
+    'jxl': '\ue60d',
+    'kbx': '\U000f0bc4',
+    'kdb': '\uf23e',
+    'kdbx': '\uf23e',
+    'kdenlive': '\uf33c',
+    'kdenlivetitle': '\uf33c',
+    'kicad_dru': '\uf34c',
+    'kicad_mod': '\uf34c',
+    'kicad_pcb': '\uf34c',
+    'kicad_prl': '\uf34c',
+    'kicad_pro': '\uf34c',
+    'kicad_sch': '\uf34c',
+    'kicad_sym': '\uf34c',
+    'kicad_wks': '\uf34c',
+    'ko': '\uf17c',
+    'kpp': '\uf33d',
+    'kra': '\uf33d',
+    'krz': '\uf33d',
+    'ksh': '\ue795',
+    'kt': '\ue634',
+    'kts': '\ue634',
+    'lck': '\ue672',
+    'leex': '\ue62d',
+    'less': '\ue614',
+    'lff': '\uf031',
+    'lhs': '\ue61f',
+    'lib': '\ueb9c',
+    'license': '\ue60a',
+    'liquid': '\ue670',
+    'lock': '\ue672',
+    'log': '\U000f0331',
+    'lrc': '\U000f0a16',
+    'lua': '\ue620',
+    'luac': '\ue620',
+    'luau': '\ue620',
+    'm': '\ue61e',
+    'm3u': '\U000f0cb9',
+    'm3u8': '\U000f0cb9',
+    'm4a': '\uf001',
+    'm4v': '\ue69f',
+    'magnet': '\uf076',
+    'makefile': '\ue779',
+    'markdown': '\ue609',
+    'material': '\ue2a6',
+    'md': '\uf48a',
+    'md5': '\U000f0565',
+    'mdx': '\uf48a',
+    'mint': '\U000f032a',
+    'mjs': '\ue60c',
+    'mk': '\ue779',
+    'mkv': '\ue69f',
+    'ml': '\ue67a',
+    'mli': '\ue67a',
+    'mm': '\ue61d',
+    'mo': '\uedfe',
+    'mobi': '\ue28b',
+    'mojo': '\uf06d',
+    'mov': '\ue69f',
+    'mp3': '\uf001',
+    'mp4': '\ue69f',
+    'mpp': '\ue61d',
+    'msf': '\uf370',
+    'mts': '\ue628',
+    'mustache': '\ue60f',
+    'nfo': '\uf129',
+    'nim': '\ue677',
+    'nix': '\uf313',
+    'norg': '\ue847',
+    'nswag': '\ue60b',
+    'nu': '\uf054',
+    'o': '\ueae8',
+    'obj': '\U000f01a7',
+    'odf': '\uf37b',
+    'odg': '\uf379',
+    'odin': '\U000f07e2',
+    'odp': '\uf37a',
+    'ods': '\uf378',
+    'odt': '\uf37c',
+    'oga': '\uf001',
+    'ogg': '\uf001',
+    'ogv': '\ue69f',
+    'ogx': '\ue69f',
+    'opus': '\uf001',
+    'org': '\ue633',
+    'otf': '\uf031',
+    'out': '\ueae8',
+    'part': '\uf019',
+    'patch': '\ue728',
+    'pck': '\uf487',
+    'pcm': '\uf001',
+    'pdf': '\ueaeb',
+    'php': '\ue608',
+    'pl': '\ue769',
+    'pls': '\U000f0cb9',
+    'ply': '\U000f01a7',
+    'pm': '\ue769',
+    'png': '\ue60d',
+    'po': '\uf1ab',
+    'pot': '\uf1ab',
+    'pp': '\ue631',
+    'ppt': '\U000f0227',
+    'pptx': '\U000f0227',
+    'prisma': '\ue684',
+    'pro': '\ue7a1',
+    'ps1': '\U000f0a0a',
+    'psb': '\ue7b8',
+    'psd': '\ue7b8',
+    'psd1': '\U000f0a0a',
+    'psm1': '\U000f0a0a',
+    'pub': '\U000f0dd6',
+    'pxd': '\ue606',
+    'pxi': '\ue606',
+    'py': '\ue606',
+    'pyc': '\ue606',
+    'pyd': '\ue606',
+    'pyi': '\ue606',
+    'pyo': '\ue606',
+    'pyw': '\ue606',
+    'pyx': '\ue606',
+    'qm': '\uf1ab',
+    'qml': '\uf375',
+    'qrc': '\uf375',
+    'qss': '\uf375',
+    'query': '\ue21c',
+    'r': '\U000f07d4',
+    'rake': '\ue791',
+    'rar': '\uf410',
+    'rasi': '\uebf6',
+    'razor': '\U000f1998',
+    'rb': '\ue791',
+    'res': '\ue688',
+    'resi': '\ue688',
+    'rlib': '\ue7a8',
+    'rmd': '\ue609',
+    'rproj': '\U000f05c6',
+    'rs': '\ue68b',
+    'rss': '\ue619',
+    's': '\ue637',
+    'sass': '\ue603',
+    'sbt': '\ue737',
+    'sc': '\ue737',
+    'scad': '\uf34e',
+    'scala': '\ue737',
+    'scm': '\U000f0627',
+    'scss': '\ue603',
+    'sh': '\ue795',
+    'sha1': '\U000f0565',
+    'sha224': '\U000f0565',
+    'sha256': '\U000f0565',
+    'sha384': '\U000f0565',
+    'sha512': '\U000f0565',
+    'sig': '\U000f0627',
+    'signature': '\U000f0627',
+    'skp': '\U000f0eeb',
+    'sldasm': '\U000f0eeb',
+    'sldprt': '\U000f0eeb',
+    'slim': '\ue60e',
+    'sln': '\ue70c',
+    'slnx': '\ue70c',
+    'slvs': '\U000f0eeb',
+    'sml': '\U000f0627',
+    'so': '\ueb9c',
+    'sol': '\ue656',
+    'spec.js': '\uf499',
+    'spec.jsx': '\uf499',
+    'spec.ts': '\uf499',
+    'spec.tsx': '\uf499',
+    'spx': '\uf001',
+    'sql': '\ue706',
+    'sqlite': '\ue706',
+    'sqlite3': '\ue706',
+    'srt': '\U000f0a16',
+    'ssa': '\U000f0a16',
+    'ste': '\U000f0eeb',
+    'step': '\U000f0eeb',
+    'stl': '\U000f01a7',
+    'stories.js': '\ue8b3',
+    'stories.jsx': '\ue8b3',
+    'stories.mjs': '\ue8b3',
+    'stories.svelte': '\ue8b3',
+    'stories.ts': '\ue8b3',
+    'stories.tsx': '\ue8b3',
+    'stories.vue': '\ue8b3',
+    'stp': '\U000f0eeb',
+    'strings': '\uf1ab',
+    'styl': '\ue600',
+    'sub': '\U000f0a16',
+    'sublime': '\ue7aa',
+    'suo': '\ue70c',
+    'sv': '\U000f035b',
+    'svelte': '\ue697',
+    'svg': '\U000f0721',
+    'svgz': '\U000f0721',
+    'svh': '\U000f035b',
+    'swift': '\ue755',
+    't': '\ue769',
+    'tbc': '\U000f06d3',
+    'tcl': '\U000f06d3',
+    'templ': '\ueac4',
+    'terminal': '\uf489',
+    'test.js': '\uf499',
+    'test.jsx': '\uf499',
+    'test.ts': '\uf499',
+    'test.tsx': '\uf499',
+    'tex': '\ue69b',
+    'tf': '\ue69a',
+    'tfvars': '\uf15b',
+    'tgz': '\uf410',
+    'tmpl': '\ueac4',
+    'tmux': '\uebc8',
+    'toml': '\ue6b2',
+    'torrent': '\uf019',
+    'tres': '\ue65f',
+    'ts': '\ue628',
+    'tscn': '\ue65f',
+    'tsconfig': '\ue772',
+    'tsx': '\ue7ba',
+    'ttf': '\uf031',
+    'twig': '\ue61c',
+    'txt': '\U000f0219',
+    'txz': '\uf410',
+    'typ': '\uf37f',
+    'typoscript': '\ue772',
+    'ui': '\uf2d0',
+    'v': '\U000f035b',
+    'vala': '\ue8d1',
+    'vert': '\ue855',
+    'vh': '\U000f035b',
+    'vhd': '\U000f035b',
+    'vhdl': '\U000f035b',
+    'vi': '\ue81e',
+    'vim': '\ue62b',
+    'vsh': '\ue6ac',
+    'vsix': '\ue70c',
+    'vue': '\ue6a0',
+    'wasm': '\ue6a1',
+    'wav': '\uf001',
+    'webm': '\ue69f',
+    'webmanifest': '\ue60b',
+    'webp': '\ue60d',
+    'webpack': '\U000f072b',
+    'wma': '\uf001',
+    'wmv': '\ue69f',
+    'woff': '\uf031',
+    'woff2': '\uf031',
+    'wrl': '\U000f01a7',
+    'wrz': '\U000f01a7',
+    'wv': '\uf001',
+    'wvc': '\uf001',
+    'x': '\ue691',
+    'xaml': '\U000f0673',
+    'xcf': '\uf338',
+    'xcplayground': '\ue755',
+    'xcstrings': '\uf1ab',
+    'xls': '\U000f021b',
+    'xlsx': '\U000f021b',
+    'xm': '\ue691',
+    'xml': '\U000f05c0',
+    'xpi': '\ue786',
+    'xslt': '\U000f05c0',
+    'xul': '\ue745',
+    'xz': '\uf410',
+    'yaml': '\ue615',
+    'yml': '\ue615',
+    'zig': '\ue6a9',
+    'zip': '\uf410',
+    'zsh': '\ue795',
+    'zst': '\uf410',
+    '🔥': '\uf06d',
 }
 
 
