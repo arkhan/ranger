@@ -13,7 +13,8 @@ from time import time
 from ranger.core.linemode import (
     DEFAULT_LINEMODE, DefaultLinemode, TitleLinemode,
     PermissionsLinemode, FileInfoLinemode, MtimeLinemode, SizeMtimeLinemode,
-    HumanReadableMtimeLinemode, SizeHumanReadableMtimeLinemode
+    HumanReadableMtimeLinemode, SizeHumanReadableMtimeLinemode,
+    IconLinemode, PermissionsIconLinemode,
 )
 from ranger.core.shared import FileManagerAware, SettingsAware
 from ranger.ext.shell_escape import shell_escape
@@ -97,7 +98,7 @@ class FileSystemObject(  # pylint: disable=too-many-instance-attributes,too-many
         (linemode.name, linemode()) for linemode in
         [DefaultLinemode, TitleLinemode, PermissionsLinemode, FileInfoLinemode,
          MtimeLinemode, SizeMtimeLinemode, HumanReadableMtimeLinemode,
-         SizeHumanReadableMtimeLinemode]
+         SizeHumanReadableMtimeLinemode, IconLinemode, PermissionsIconLinemode]
     )
 
     def __init__(self, path, preload=None, path_is_abs=False, basename_is_rel_to=None):
